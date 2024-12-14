@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
+#define APP_USE_UNLIMITED_FRAME_RATE
 #include <GLFW/glfw3.h>
 
 // Volk headers

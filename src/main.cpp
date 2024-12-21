@@ -4,7 +4,7 @@
 int main() {
     {
         Window window = Window();
-        Grid grid = Grid(100, 100);
+        Grid grid = Grid(100, 100, window);
 
         while (!window.should_close()) {
             window.run();

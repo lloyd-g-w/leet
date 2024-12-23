@@ -1,6 +1,6 @@
 # Example usage: mkdir build cd build cmake -g "Visual Studio 14 2015" ..
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.15)
 project(holy-sheet C CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -21,6 +21,7 @@ option(GLFW_BUILD_TESTS "Build the GLFW test programs" OFF)
 option(GLFW_BUILD_DOCS "Build the GLFW documentation" OFF)
 option(GLFW_INSTALL "Generate installation target" OFF)
 option(GLFW_DOCUMENT_INTERNALS "Include internals in documentation" OFF)
+set(GLFW_USE_VULKAN ON)
 add_subdirectory(${GLFW_DIR} binary_dir EXCLUDE_FROM_ALL)
 include_directories(${GLFW_DIR}/include)
 
@@ -37,7 +38,9 @@ set(LIBRARIES "glfw;Vulkan::Vulkan")
 # Use vulkan headers from glfw:
 include_directories(${GLFW_DIR}/deps)
 
-file(GLOB sources src/*.cpp)
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+file(GLOB_RECURSE sources "${SRC_DIR}/*.cpp")
+
 
 add_executable(
   holy-sheet

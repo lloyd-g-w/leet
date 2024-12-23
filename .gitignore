@@ -47,4 +47,5 @@ _deps
 CMakeUserPresets.json
 
 # Other
+.cache
 imgui.ini

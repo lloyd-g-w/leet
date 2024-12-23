@@ -1,10 +1,10 @@
-#include "headers/grid.hpp"
-#include "headers/window.hpp"
+#include "frontend/grid.hpp"
+#include "frontend/window.hpp"
 
 int main() {
     {
         Window window = Window();
-        Grid grid = Grid(100, 100, window);
+        Grid grid = Grid(30, 15, window);
 
         while (!window.should_close()) {
             window.run();

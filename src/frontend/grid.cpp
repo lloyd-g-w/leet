@@ -1,6 +1,5 @@
 #include "grid.hpp"
 #include <cstring>
-#include <iostream>
 
 #include "../backend/cell.hpp"
 #include "imgui.h"
@@ -31,7 +30,11 @@ Grid::Grid(int rows, int cols, Window &window) : window(window) {
 
     ImGuiIO &io = ImGui::GetIO();
     jetbrains_mono = io.Fonts->AddFontFromFileTTF(
-        "src/fonts/JetBrainsMono-Regular.ttf", DEFAULT_CELL_HEIGHT);
+        "src/fonts/JetBrainsMono-Regular.ttf",
+        DEFAULT_CELL_HEIGHT - ImGui::GetStyle().FramePadding.y * 2.0f -
+            ImGui::GetStyle().FrameBorderSize * 2.0f);
+
+    io.FontDefault = jetbrains_mono;
 
     colours.add_preset(Colours::BASIC_COLOURS);
 };
@@ -43,9 +46,7 @@ void Grid::draw() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        ImU32 COLOR_GREY = colours.get("grey").imu32();
         ImU32 COLOR_DARK_GREY = colours.get("dark_grey").imu32();
-        ImU32 COLOR_BLUE = colours.get("blue").imu32();
         ImU32 COLOR_WHITE = colours.get("white").imu32();
         ImU32 COLOR_BLACK = colours.get("black").imu32();
 
@@ -65,27 +66,24 @@ void Grid::draw() {
 
             ImGui::PopStyleColor();
 
-            const double CELL_WIDTH = 75.0;
-            const double CELL_HEIGHT = 25.0;
-
             // Set general cell style
             ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_WHITE);
             ImGui::PushStyleColor(ImGuiCol_Text, COLOR_BLACK);
-            ImGui::PushItemWidth(CELL_WIDTH);
-            ImGui::PushFont(jetbrains_mono);
+            ImGui::PushItemWidth(DEFAULT_CELL_WIDTH);
 
             Grid::draw_col_labels();
 
-            for (auto row = 0; row < rows; row++) {
+            while (num_rows_drawn < rows) {
                 Grid::draw_row();
             }
 
             // Pop cell style
-            ImGui::PopFont();
             ImGui::PopItemWidth();
             ImGui::PopStyleColor(2);
 
             ImGui::End();
+
+            Grid::reset_for_next_draw();
         }
     }
 }
@@ -119,25 +117,23 @@ void Grid::draw_col_labels() {
 }
 
 void Grid::draw_row_label() {
-    ImGui::PushStyleColor(ImGuiCol_Button,
-                          ImVec4(0.2f, 0.3f, 0.4f,
-                                 1.0f));  // Header background color
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-                          ImVec4(0.3f, 0.4f, 0.5f, 1.0f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-                          ImVec4(0.25f, 0.35f, 0.45f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_Button, colours.get("grey").imu32());
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colours.get("blue").imu32());
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, colours.get("grey").imu32());
+    ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
 
     // Make dynamic sizes
-    ImGui::Button(std::to_string(this->num_rows_drawn).c_str(),
+    ImGui::Button(std::to_string(num_rows_drawn+1).c_str(),
                   ImVec2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT));
 
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleColor(4);
     ImGui::SameLine(0.0f, 1.0f);
 }
 
 void Grid::draw_cell() {
     int row = num_rows_drawn;
-    int col = num_rows_drawn;
+    int col = num_cols_drawn++;
+
     Position cell_pos = {row, col};
 
     std::string label =
@@ -187,7 +183,7 @@ void Grid::draw_cell() {
 
 void Grid::draw_row() {
     Grid::draw_row_label();
-    for (; num_cols_drawn < cols; num_cols_drawn++) {
+    while (num_cols_drawn < cols) {
         Grid::draw_cell();
     }
     num_rows_drawn++;

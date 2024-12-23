@@ -22,7 +22,7 @@ class Grid {
     };
 
     static constexpr float DEFAULT_CELL_WIDTH = 75.0;
-    static constexpr float DEFAULT_CELL_HEIGHT = 20.0;
+    static constexpr float DEFAULT_CELL_HEIGHT = 30.0;
 
     struct cell_data {
         Cell cell;
@@ -44,6 +44,11 @@ class Grid {
 
   public:
     void draw();
+    void reset_for_next_draw() {
+        num_rows_drawn = 0;
+        num_cols_drawn = 0;
+    };
+
     ImFont *jetbrains_mono;
     Colours colours = Colours();
 

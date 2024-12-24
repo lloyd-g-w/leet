@@ -11,7 +11,7 @@
 
 class Window {
   public:
-    Window();
+    Window(int width, int height, const char *name);
     ~Window();
 
   public:

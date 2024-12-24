@@ -3,8 +3,8 @@
 
 int main() {
     {
-        Window window = Window();
-        Grid grid = Grid(30, 15, window);
+        Window window = Window(1920, 1080, "Holy Sheet");
+        Grid grid = Grid(30, 30, window);
 
         while (!window.should_close()) {
             window.run();

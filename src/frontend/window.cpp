@@ -1,4 +1,5 @@
 #include "window.hpp"
+
 #include "imgui_impl_glfw.h"
 
 // Volk headers
@@ -24,7 +25,7 @@
 // -------------------- Window class --------------------
 // ------------------------------------------------------
 
-Window::Window() {
+Window::Window(int width, int height, const char *name) {
     glfwSetErrorCallback(this->glfw_error_callback);
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
@@ -33,8 +34,7 @@ Window::Window() {
 
     // Create window with Vulkan context
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+Vulkan example",
-                              nullptr, nullptr);
+    window = glfwCreateWindow(width, height, name, nullptr, nullptr);
     if (!glfwVulkanSupported()) {
         fprintf(stderr, "GLFW: Vulkan Not Supported\n");
         return;

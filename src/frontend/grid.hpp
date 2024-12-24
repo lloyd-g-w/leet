@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "../backend/cell.hpp"
 #include "colours.cpp"
 #include "imgui.h"
@@ -88,14 +86,18 @@ class Grid {
         }
     };
 
-    int num_rows_drawn = 0;
-    int num_cols_drawn = 0;
+    Window &window;
+
     int rows, cols;
+
     Cells cells;
     Labels row_labels;
     Labels col_labels;
-    Window &window;
 
+    int num_rows_drawn = 0;
+    int num_cols_drawn = 0;
+
+    // Utils
     void draw_col_labels();
     void draw_row_label();
     void draw_column();
@@ -103,4 +105,5 @@ class Grid {
     void draw_cell();
     void set_column_width(int col, float width);
     void set_row_height(int row, float height);
+    std::string num_to_alpha(int num);
 };

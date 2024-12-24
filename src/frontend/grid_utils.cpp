@@ -123,14 +123,14 @@ void Grid::draw_cell() {
     float cell_height = cell_data->dimensions.height;
 
     // Ensure there is a white rectangle behind the cell
-    ImDrawList *drawList = ImGui::GetWindowDrawList();
+    ImVec2 rect_min = ImGui::GetCursorScreenPos();
+    ImVec2 rect_max = ImVec2(rect_min.x + cell_width, rect_min.y + cell_height);
 
-    ImVec2 rect_min = ImGui::GetCursorPos();  // Top left
-    ImVec2 rect_max = ImVec2(rect_min.x + cell_width,
-                             rect_min.y + cell_height);  // Bottom right
+    ImGui::GetWindowDrawList()->AddRectFilled(rect_min, rect_max,
+                                              colours.get("white").imu32(),
+                                              0.0f, ImDrawFlags_None);
 
-    drawList->AddRectFilled(rect_min, rect_max, colours.get("white").imu32());
-
+    // Draw the cell
     if (cell_data->is_editing) {
         ImGui::PushStyleColor(ImGuiCol_FrameBg, colours.get("white").imu32());
 
@@ -201,8 +201,9 @@ void Grid::draw_cell() {
 
     // Highlight active cell
     if (active_cell == cell_pos) {
-        drawList->AddRect(rect_min, rect_max, colours.get("blue").imu32(), 0.0f,
-                          ImDrawFlags_None, 2.0f);
+        ImGui::GetWindowDrawList()->AddRect(rect_min, rect_max,
+                                            colours.get("blue").imu32(), 0.0f,
+                                            ImDrawFlags_None, 2.0f);
     }
 
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {

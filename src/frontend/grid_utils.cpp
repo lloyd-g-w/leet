@@ -10,16 +10,31 @@ void Grid::draw_col_labels() {
 
         ImGui::PushStyleColor(ImGuiCol_Button, colours.get("grey").imu32());
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-                              colours.get("blue").imu32());
+                              colours.get("grey").imu32());
         ImGui::PushStyleColor(ImGuiCol_ButtonActive,
                               colours.get("grey").imu32());
         ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
+
+        bool is_active = active_cell.col == col;
+
+        if (is_active) {
+            ImGui::PushStyleColor(ImGuiCol_Button, colours.get("blue").imu32());
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+                                  colours.get("blue").imu32());
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive,
+                                  colours.get("blue").imu32());
+            ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
+        }
 
         // Make dynamic sizes
         float *label_width = &col_labels.at(col)->dimensions.width;
 
         ImGui::Button(columnLabel.c_str(),
                       ImVec2(*label_width, DEFAULT_CELL_HEIGHT));
+
+        if (is_active) {
+            ImGui::PopStyleColor(4);
+        }
 
         ImVec2 buttonMin = ImGui::GetItemRectMin();
         ImVec2 buttonMax = ImGui::GetItemRectMax();
@@ -33,11 +48,11 @@ void Grid::draw_col_labels() {
                 ImGuiMouseCursor_ResizeEW);  // Change cursor to resizer
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                col_labels.at(col)->is_editing = true;
+                col_labels.at(col)->is_resizing = true;
             }
         }
 
-        if (col_labels.at(col)->is_editing) {
+        if (col_labels.at(col)->is_resizing) {
             if (ImGui::GetMousePos().x > buttonMin.x + 6.0f) {
                 set_column_width(col, ImGui::GetMousePos().x - buttonMin.x);
             }
@@ -46,7 +61,7 @@ void Grid::draw_col_labels() {
         }
 
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            col_labels.at(col)->is_editing = false;
+            col_labels.at(col)->is_resizing = false;
         }
 
         ImGui::PopStyleColor(4);
@@ -59,7 +74,7 @@ void Grid::draw_col_labels() {
 
 void Grid::draw_row_label() {
     ImGui::PushStyleColor(ImGuiCol_Button, colours.get("grey").imu32());
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colours.get("blue").imu32());
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colours.get("grey").imu32());
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, colours.get("grey").imu32());
     ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
 
@@ -67,9 +82,24 @@ void Grid::draw_row_label() {
     auto row_label = row_labels.at(row);
     float *row_height = &row_label->dimensions.height;
 
+    bool is_active = active_cell.row == row;
+
+    if (is_active) {
+        ImGui::PushStyleColor(ImGuiCol_Button, colours.get("blue").imu32());
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+                              colours.get("blue").imu32());
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive,
+                              colours.get("blue").imu32());
+        ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
+    }
+
     // Make dynamic sizes
     ImGui::Button(std::to_string(num_rows_drawn + 1).c_str(),
                   ImVec2(DEFAULT_CELL_WIDTH, *row_height));
+
+    if (is_active) {
+        ImGui::PopStyleColor(4);
+    }
 
     ImVec2 buttonMin = ImGui::GetItemRectMin();
     ImVec2 buttonMax = ImGui::GetItemRectMax();
@@ -83,11 +113,11 @@ void Grid::draw_row_label() {
             ImGuiMouseCursor_ResizeNS);  // Change cursor to resizer
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            row_label->is_editing = true;
+            row_label->is_resizing = true;
         }
     }
 
-    if (row_label->is_editing) {
+    if (row_label->is_resizing) {
         if (ImGui::GetMousePos().y > buttonMin.y + 6.0f) {
             set_row_height(row, ImGui::GetMousePos().y - buttonMin.y);
         }
@@ -96,7 +126,7 @@ void Grid::draw_row_label() {
     }
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-        row_label->is_editing = false;
+        row_label->is_resizing = false;
     }
 
     ImGui::PopStyleColor(4);

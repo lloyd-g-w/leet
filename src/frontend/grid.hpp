@@ -6,6 +6,8 @@
 #include "window.hpp"
 
 #define NULL_POS {-1, -1}
+static constexpr int COL_LABEL = -1;
+static constexpr int ROW_LABEL = -1;
 
 class Grid {
   public:
@@ -22,8 +24,6 @@ class Grid {
         float width, height;
     };
 
-    static constexpr int COL_LABEL = -1;
-    static constexpr int ROW_LABEL = -1;
     static constexpr float DEFAULT_CELL_WIDTH = 75.0;
     static constexpr float DEFAULT_CELL_HEIGHT = 30.0;
 
@@ -74,14 +74,26 @@ class Grid {
         }
     };
 
-    struct Labels {
-        std::vector<cell_data> data;
+    struct label_data {
+        bool is_resizing = false;
 
-        cell_data *at(int index) {
+        int index;
+
+        Dimensions dimensions;
+
+        label_data(int index,
+                   Dimensions dim = {DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT})
+            : index(index), dimensions(dim) {}
+    };
+
+    struct Labels {
+        std::vector<label_data> data;
+
+        label_data *at(int index) {
             return &data.at(index);
         }
 
-        void push(cell_data label) {
+        void push(label_data label) {
             data.push_back(label);
         }
     };

@@ -84,7 +84,7 @@ class Colours {
                 add("black", Colour(0, 0, 0));
                 add("red", Colour(255, 0, 0));
                 add("green", Colour(0, 255, 0));
-                add("blue", Colour(0, 0, 255));
+                add("blue", Colour(0, 119, 182));
                 add("yellow", Colour(255, 255, 0));
                 add("cyan", Colour(0, 255, 255));
                 add("magenta", Colour(255, 0, 255));

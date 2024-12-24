@@ -12,7 +12,7 @@ Grid::Grid(int rows, int cols, Window &window) : window(window) {
     for (auto row = 0; row < rows; row++) {
         std::vector<Grid::cell_data> cell_row;
 
-        auto row_label = Grid::cell_data({row, ROW_LABEL});
+        auto row_label = Grid::label_data(row);
         row_labels.push(row_label);
 
         for (auto col = 0; col < cols; col++) {
@@ -25,7 +25,7 @@ Grid::Grid(int rows, int cols, Window &window) : window(window) {
 
     // Create col labels
     for (auto col = 0; col < cols; col++) {
-        auto col_label = Grid::cell_data({COL_LABEL, col});
+        auto col_label = Grid::label_data(col);
         col_labels.push(col_label);
     }
 
@@ -60,7 +60,7 @@ void Grid::draw() {
                                   colours.get("dark_grey").imu32());
 
             ImGui::Begin(
-                "Cells", nullptr,
+                "Grid", nullptr,
                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
                     ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
                     ImGuiWindowFlags_NoBringToFrontOnFocus |

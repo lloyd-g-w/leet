@@ -1,9 +1,9 @@
 #include "grid.hpp"
 
-class Menu {
+class menu {
   public:
-    Menu(Grid *grid) : grid(grid) {};
+    menu(grid_space::grid *grid) : grid(grid) {};
 
   private:
-    Grid *grid;
+    grid_space::grid *grid;
 };

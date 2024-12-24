@@ -1,51 +1,48 @@
 #include "grid.hpp"
-#include <cstring>
 
-#include "imgui.h"
 #include "imgui_impl_glfw.h"
-#include "window.hpp"
+using namespace grid_space;
 
-Grid::Grid(int rows, int cols, Window &window) : window(window) {
-    this->rows = rows;
-    this->cols = cols;
-    // Create cells
-    for (auto row = 0; row < rows; row++) {
-        std::vector<Grid::cell_data> cell_row;
-
-        auto row_label = Grid::label_data(row);
-        row_labels.push(row_label);
-
-        for (auto col = 0; col < cols; col++) {
-            auto cell_data = Grid::cell_data({row, col});
-            cell_row.push_back(cell_data);
-        }
-
-        cells.push_row(cell_row);
-    }
+grid::grid(int rows, int cols, Window &window) : m_window(window) {
+    // Set up grid
+    m_rows = rows;
+    m_cols = cols;
 
     // Create col labels
     for (auto col = 0; col < cols; col++) {
-        auto col_label = Grid::label_data(col);
-        col_labels.push(col_label);
+        m_col_labels.push(label_data(col));
     }
 
-    // Set style and get font
+    // Create grid of cells
+    for (auto row = 0; row < rows; row++) {
+        // Add label for this row
+        m_row_labels.push(label_data(row));
+
+        // Add cells for this row
+        v_cell_data cell_row;
+        for (auto col = 0; col < cols; col++) {
+            cell_row.push_back(cell_data({row, col}));
+        }
+        m_cells.push_row(cell_row);
+    }
+
+    // Get style and io
     ImGuiStyle &style = ImGui::GetStyle();
+    ImGuiIO &io = ImGui::GetIO();
+
+    // Set style
     style.ItemSpacing = ImVec2(1.0f, 1.0f);
 
-    ImGuiIO &io = ImGui::GetIO();
-    jetbrains_mono = io.Fonts->AddFontFromFileTTF(
+    // Load font and set as default
+    m_font = io.Fonts->AddFontFromFileTTF(
         "src/fonts/JetBrainsMono-Regular.ttf",
         DEFAULT_CELL_HEIGHT - ImGui::GetStyle().FramePadding.y * 2.0f -
             ImGui::GetStyle().FrameBorderSize * 2.0f);
-
-    io.FontDefault = jetbrains_mono;
-
-    colours.add_preset(Colours::BASIC_COLOURS);
+    io.FontDefault = m_font;
 };
 
-void Grid::draw() {
-    if (!window.should_close()) {
+void grid::draw() {
+    if (!m_window.should_close()) {
         // Start the Dear ImGui frame
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -56,9 +53,11 @@ void Grid::draw() {
             ImGui::SetNextWindowPos(ImVec2(0, 0));
             ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 
+            // Set the background colour
             ImGui::PushStyleColor(ImGuiCol_WindowBg,
-                                  colours.get("dark_grey").imu32());
+                                  m_colours.get("dark_grey").imgui());
 
+            // Draw the grid
             ImGui::Begin(
                 "Grid", nullptr,
                 ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
@@ -69,14 +68,14 @@ void Grid::draw() {
             ImGui::PopStyleColor();
 
             // Draw col labels and then rows
-            Grid::draw_col_labels();
-            while (num_rows_drawn < rows) {
-                Grid::draw_row();
+            draw_col_labels();
+            while (m_num_rows_drawn < m_rows) {
+                draw_row();
             }
 
             ImGui::End();
 
-            Grid::reset_for_next_draw();
+            reset_for_next_draw();
         }
     }
 }

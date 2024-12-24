@@ -2,8 +2,10 @@
 #include <cmath>
 #include <sstream>
 
+using namespace cell_space;
+
 // Returns false if the cell is not a formula
-Cell::parse_result Cell::parse() {
+cell::parse_res_t cell::parse() {
     std::istringstream iss(this->raw_value);
     computed_value.clear();
 

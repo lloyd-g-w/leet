@@ -4,7 +4,7 @@
 int main() {
     {
         Window window = Window(1920, 1080, "Holy Sheet");
-        Grid grid = Grid(30, 30, window);
+        grid_space::grid grid = grid_space::grid(30, 30, window);
 
         while (!window.should_close()) {
             window.run();

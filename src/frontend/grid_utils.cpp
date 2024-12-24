@@ -1,33 +1,37 @@
 #include "grid.hpp"
 #include "imgui_wrappers.hpp"
 
-void Grid::draw_col_labels() {
+using namespace grid_space;
+
+void grid::draw_col_labels() {
     ImGui::Dummy(ImVec2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT));
     ImGui::SameLine(0.0f, 1.0f);
 
-    for (auto col = 0; col < cols; col++) {
-        std::string columnLabel = Grid::num_to_alpha(col + 1);
+    for (auto col = 0; col < m_cols; col++) {
+        str columnLabel = num_to_alpha(col + 1);
 
-        ImGui::PushStyleColor(ImGuiCol_Button, colours.get("grey").imu32());
+        ImGui::PushStyleColor(ImGuiCol_Button, m_colours.get("grey").imgui());
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-                              colours.get("grey").imu32());
+                              m_colours.get("grey").imgui());
         ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-                              colours.get("grey").imu32());
-        ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
+                              m_colours.get("grey").imgui());
+        ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("white").imgui());
 
-        bool is_active = active_cell.col == col;
+        bool is_active = m_active_cell.col == col;
 
         if (is_active) {
-            ImGui::PushStyleColor(ImGuiCol_Button, colours.get("blue").imu32());
+            ImGui::PushStyleColor(ImGuiCol_Button,
+                                  m_colours.get("active_blue").imgui());
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-                                  colours.get("blue").imu32());
+                                  m_colours.get("active_blue").imgui());
             ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-                                  colours.get("blue").imu32());
-            ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
+                                  m_colours.get("active_blue").imgui());
+            ImGui::PushStyleColor(ImGuiCol_Text,
+                                  m_colours.get("white").imgui());
         }
 
         // Make dynamic sizes
-        float *label_width = &col_labels.at(col)->dimensions.width;
+        float *label_width = &m_col_labels.at(col)->dimensions.width;
 
         ImGui::Button(columnLabel.c_str(),
                       ImVec2(*label_width, DEFAULT_CELL_HEIGHT));
@@ -48,11 +52,11 @@ void Grid::draw_col_labels() {
                 ImGuiMouseCursor_ResizeEW);  // Change cursor to resizer
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                col_labels.at(col)->is_resizing = true;
+                m_col_labels.at(col)->is_resizing = true;
             }
         }
 
-        if (col_labels.at(col)->is_resizing) {
+        if (m_col_labels.at(col)->is_resizing) {
             if (ImGui::GetMousePos().x > buttonMin.x + 6.0f) {
                 set_column_width(col, ImGui::GetMousePos().x - buttonMin.x);
             }
@@ -61,40 +65,42 @@ void Grid::draw_col_labels() {
         }
 
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-            col_labels.at(col)->is_resizing = false;
+            m_col_labels.at(col)->is_resizing = false;
         }
 
         ImGui::PopStyleColor(4);
 
-        if (col < cols - 1) {
+        if (col < m_cols - 1) {
             ImGui::SameLine(0.0f, 1.0f);
         }
     }
 }
 
-void Grid::draw_row_label() {
-    ImGui::PushStyleColor(ImGuiCol_Button, colours.get("grey").imu32());
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colours.get("grey").imu32());
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, colours.get("grey").imu32());
-    ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
+void grid::draw_row_label() {
+    ImGui::PushStyleColor(ImGuiCol_Button, m_colours.get("grey").imgui());
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+                          m_colours.get("grey").imgui());
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_colours.get("grey").imgui());
+    ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("white").imgui());
 
-    int row = num_rows_drawn;
-    auto row_label = row_labels.at(row);
+    int row = m_num_rows_drawn;
+    auto row_label = m_row_labels.at(row);
     float *row_height = &row_label->dimensions.height;
 
-    bool is_active = active_cell.row == row;
+    bool is_active = m_active_cell.row == row;
 
     if (is_active) {
-        ImGui::PushStyleColor(ImGuiCol_Button, colours.get("blue").imu32());
+        ImGui::PushStyleColor(ImGuiCol_Button,
+                              m_colours.get("active_blue").imgui());
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
-                              colours.get("blue").imu32());
+                              m_colours.get("active_blue").imgui());
         ImGui::PushStyleColor(ImGuiCol_ButtonActive,
-                              colours.get("blue").imu32());
-        ImGui::PushStyleColor(ImGuiCol_Text, colours.get("white").imu32());
+                              m_colours.get("active_blue").imgui());
+        ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("white").imgui());
     }
 
     // Make dynamic sizes
-    ImGui::Button(std::to_string(num_rows_drawn + 1).c_str(),
+    ImGui::Button(std::to_string(m_num_rows_drawn + 1).c_str(),
                   ImVec2(DEFAULT_CELL_WIDTH, *row_height));
 
     if (is_active) {
@@ -133,21 +139,23 @@ void Grid::draw_row_label() {
     ImGui::SameLine(0.0f, 1.0f);
 }
 
-void Grid::draw_cell() {
-    int row = num_rows_drawn;
-    int col = num_cols_drawn++;
+void grid::draw_cell() {
+    int row = m_num_rows_drawn;
+    int col = m_num_cols_drawn++;
 
-    Position cell_pos = {row, col};
-    auto cell_data = cells.at(row, col);
+    pos cell_pos = {row, col};
+    auto cell_data = m_cells.at(row, col);
 
-    std::string label = "##" + std::to_string(cell_pos.row) + "-" +
-                        std::to_string(cell_pos.col);
+    str label = "##" + std::to_string(cell_pos.row) + "-" +
+                std::to_string(cell_pos.col);
 
     // Create cell
-    ImGui::PushStyleColor(ImGuiCol_Button, colours.get("white").imu32());
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, colours.get("white").imu32());
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, colours.get("white").imu32());
-    ImGui::PushStyleColor(ImGuiCol_Text, colours.get("black").imu32());
+    ImGui::PushStyleColor(ImGuiCol_Button, m_colours.get("white").imgui());
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+                          m_colours.get("white").imgui());
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,
+                          m_colours.get("white").imgui());
+    ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("black").imgui());
 
     float cell_width = cell_data->dimensions.width;
     float cell_height = cell_data->dimensions.height;
@@ -157,12 +165,12 @@ void Grid::draw_cell() {
     ImVec2 rect_max = ImVec2(rect_min.x + cell_width, rect_min.y + cell_height);
 
     ImGui::GetWindowDrawList()->AddRectFilled(rect_min, rect_max,
-                                              colours.get("white").imu32(),
+                                              m_colours.get("white").imgui(),
                                               0.0f, ImDrawFlags_None);
 
     // Draw the cell
     if (cell_data->is_editing) {
-        ImGui::PushStyleColor(ImGuiCol_FrameBg, colours.get("white").imu32());
+        ImGui::PushStyleColor(ImGuiCol_FrameBg, m_colours.get("white").imgui());
 
         ImGui::SetNextItemWidth(cell_width);
         ImGui::InputDynamicText(label.c_str(), &cell_data->cell.raw_value);
@@ -198,25 +206,25 @@ void Grid::draw_cell() {
         // Step 3: Draw Overlay Text Directly with DrawList
         ImDrawList *drawList = ImGui::GetForegroundDrawList();
 
-        std::string overlay = cell_data->cell.is_computed() ?
-                                  cell_data->cell.computed_value :
-                                  cell_data->cell.raw_value;
+        str overlay = cell_data->cell.is_computed() ?
+                          cell_data->cell.computed_value :
+                          cell_data->cell.raw_value;
 
         ImVec2 textSize = ImGui::CalcTextSize(overlay.c_str());
         ImVec2 textPos =
             ImVec2(buttonMin.x + 5.0f, buttonCenter.y - textSize.y * 0.5f);
 
-        float dist = Grid::next_populated_cell_dist(cell_pos);
+        float dist = next_populated_dist(cell_pos);
 
         ImVec2 clip_rect_max =
-            ImVec2(buttonMax.x + Grid::next_populated_cell_dist(cell_pos) -
+            ImVec2(buttonMax.x + next_populated_dist(cell_pos) -
                        ImGui::GetStyle().FramePadding.x,
                    buttonMax.y);
 
         drawList->PushClipRect(buttonMin, clip_rect_max, false);
 
         // Draw Text on Top of the Button
-        drawList->AddText(textPos, colours.get("black").imu32(),
+        drawList->AddText(textPos, m_colours.get("black").imgui(),
                           overlay.c_str());
 
         // Make raw value visible if double clicked
@@ -230,33 +238,33 @@ void Grid::draw_cell() {
     ImGui::PopStyleColor(4);
 
     // Highlight active cell
-    if (active_cell == cell_pos) {
-        ImGui::GetWindowDrawList()->AddRect(rect_min, rect_max,
-                                            colours.get("blue").imu32(), 0.0f,
-                                            ImDrawFlags_None, 2.0f);
+    if (m_active_cell == cell_pos) {
+        ImGui::GetWindowDrawList()->AddRect(
+            rect_min, rect_max, m_colours.get("active_blue").imgui(), 0.0f,
+            ImDrawFlags_None, 2.0f);
     }
 
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-        active_cell = cell_pos;
+        m_active_cell = cell_pos;
     }
 
-    if (col < cols - 1)
+    if (col < m_cols - 1)
         ImGui::SameLine(0.0f, 1.0f);
 }
 
-void Grid::draw_row() {
-    Grid::draw_row_label();
-    while (num_cols_drawn < cols) {
-        Grid::draw_cell();
+void grid::draw_row() {
+    draw_row_label();
+    while (m_num_cols_drawn < m_cols) {
+        draw_cell();
     }
-    num_rows_drawn++;
-    num_cols_drawn = 0;
+    m_num_rows_drawn++;
+    m_num_cols_drawn = 0;
 }
 
-float Grid::next_populated_cell_dist(Position pos) {
+float grid::next_populated_dist(pos pos) {
     float dist = 0.0;
-    for (auto curr_col = pos.col + 1; curr_col < cols; curr_col++) {
-        auto curr_cell = cells.at(pos.row, curr_col);
+    for (auto curr_col = pos.col + 1; curr_col < m_cols; curr_col++) {
+        auto curr_cell = m_cells.at(pos.row, curr_col);
         if (curr_cell->is_populated()) {
             return dist;
         }
@@ -266,22 +274,22 @@ float Grid::next_populated_cell_dist(Position pos) {
     return dist;
 }
 
-void Grid::set_column_width(int col, float width) {
-    col_labels.at(col)->dimensions.width = width;
-    for (auto row = 0; row < rows; row++) {
-        cells.at(row, col)->dimensions.width = width;
+void grid::set_column_width(int col, float width) {
+    m_col_labels.at(col)->dimensions.width = width;
+    for (auto row = 0; row < m_rows; row++) {
+        m_cells.at(row, col)->dimensions.width = width;
     }
 }
 
-void Grid::set_row_height(int row, float height) {
-    row_labels.at(row)->dimensions.height = height;
-    for (auto col = 0; col < cols; col++) {
-        cells.at(row, col)->dimensions.height = height;
+void grid::set_row_height(int row, float height) {
+    m_row_labels.at(row)->dimensions.height = height;
+    for (auto col = 0; col < m_cols; col++) {
+        m_cells.at(row, col)->dimensions.height = height;
     }
 }
 
-std::string Grid::num_to_alpha(int num) {
-    std::string res;
+str grid::num_to_alpha(int num) {
+    str res;
     while (num > 0) {
         num--;  // Adjust to make 1 → A instead of 0 → A
         res.insert(res.begin(), 'A' + (num % 26));

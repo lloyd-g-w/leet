@@ -9,4 +9,8 @@ int InputDynamicText(const char *label, std::string *buf,
                      ImGuiInputTextFlags flags = 0,
                      ImGuiInputTextCallback callback = NULL,
                      void *user_data = NULL);
-}
+int InputDynamicTextOverflow(const char *label, std::string *buf,
+                             ImGuiInputTextFlags flags = 0,
+                             ImGuiInputTextCallback callback = NULL,
+                             void *user_data = NULL);
+}  // namespace ImGui

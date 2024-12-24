@@ -5,11 +5,12 @@
 
 class Cell {
   public:
-    std::string buffer;
+    enum parse_result {
+        OK,
+        INVALID_SYNTAX
+    };
     std::string raw_value;
-    std::string computed_value;
-
-    bool is_computed = false;
+    std::string computed_value = "";
 
   private:
     struct parsed_data {
@@ -18,13 +19,11 @@ class Cell {
     parsed_data m_parsed_data;
 
   public:
-    Cell(std::string raw_value = "") {
-        if (raw_value != "") {
-            this->raw_value = raw_value;
-        }
+    Cell(std::string raw_value = "") : raw_value(raw_value) {}
+
+    bool is_computed() {
+        return !computed_value.empty();
     }
 
-    bool parse();
-
-    void compute();
+    parse_result parse();
 };

@@ -1,5 +1,6 @@
+#include "../wrappers/imgui_wrappers.hpp"
 #include "grid.hpp"
-#include "imgui_wrappers.hpp"
+#include "imgui_internal.h"
 
 using namespace grid_space;
 

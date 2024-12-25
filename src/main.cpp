@@ -1,17 +1,9 @@
-#include "frontend/grid.hpp"
-#include "frontend/window.hpp"
+#include "frontend/application.hpp"
 
 int main() {
-    {
-        Window window = Window(1920, 1080, "Holy Sheet");
-        grid_space::grid grid = grid_space::grid(30, 30, window);
+    app holysheet = app("Holy Sheet", 1920, 1080, 50, 50);
 
-        while (!window.should_close()) {
-            window.run();
-            grid.draw();
-            window.render();
-        }
-    }
+    holysheet.run();
 
     return 0;
 }

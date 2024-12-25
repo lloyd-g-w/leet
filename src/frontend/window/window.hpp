@@ -9,10 +9,10 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-class Window {
+class window {
   public:
-    Window(int width, int height, const char *name);
-    ~Window();
+    window(int width, int height, const char *name);
+    ~window();
 
   public:
     void run();
@@ -22,7 +22,7 @@ class Window {
   private:
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
-    GLFWwindow *window;
+    GLFWwindow *m_window;
     ImGui_ImplVulkan_InitInfo init_info = {};
     ImGuiIO *io;
 

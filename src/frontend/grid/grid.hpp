@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../backend/cell.hpp"
-#include "../common.hpp"
+#include "../../backend/cell/cell.hpp"
+#include "../../common/types.hpp"
+#include "../utils/colours.hpp"
+#include "../window/window.hpp"
 #include "imgui.h"
-#include "utils/colours.hpp"
-#include "window.hpp"
 
 namespace grid_space {
 using namespace holy_space;
@@ -81,7 +81,7 @@ class grid {
     pos m_active_cell = NULL_POS;
 
     // Main functions
-    grid(int rows, int cols, Window &window);
+    grid(int rows, int cols, window &window);
     void draw();
     void reset_for_next_draw() {
         m_num_rows_drawn = 0;
@@ -100,7 +100,7 @@ class grid {
     int m_num_cols_drawn = 0;
 
     // Window reference
-    Window &m_window;
+    window &m_window;
 
     // Main data
     int m_rows, m_cols;

@@ -1,4 +1,5 @@
-#include "grid.hpp"
+#pragma once
+#include "../grid/grid.hpp"
 
 class menu {
   public:

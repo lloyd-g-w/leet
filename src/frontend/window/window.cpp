@@ -25,7 +25,7 @@
 // -------------------- Window class --------------------
 // ------------------------------------------------------
 
-Window::Window(int width, int height, const char *name) {
+window::window(int width, int height, const char *name) {
     glfwSetErrorCallback(this->glfw_error_callback);
     if (!glfwInit()) {
         fprintf(stderr, "Failed to initialize GLFW\n");
@@ -34,7 +34,7 @@ Window::Window(int width, int height, const char *name) {
 
     // Create window with Vulkan context
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    window = glfwCreateWindow(width, height, name, nullptr, nullptr);
+    m_window = glfwCreateWindow(width, height, name, nullptr, nullptr);
     if (!glfwVulkanSupported()) {
         fprintf(stderr, "GLFW: Vulkan Not Supported\n");
         return;
@@ -47,11 +47,11 @@ Window::Window(int width, int height, const char *name) {
 
     // Create Window Surface
     VkResult err =
-        glfwCreateWindowSurface(g_Instance, window, g_Allocator, &surface);
+        glfwCreateWindowSurface(g_Instance, m_window, g_Allocator, &surface);
     check_vk_result(err);
 
     // Create Framebuffers
-    glfwGetFramebufferSize(window, &w, &h);
+    glfwGetFramebufferSize(m_window, &w, &h);
     wd = &g_MainWindowData;
     SetupVulkanWindow(wd, surface, w, h);
 
@@ -70,7 +70,7 @@ Window::Window(int width, int height, const char *name) {
     //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForVulkan(window, true);
+    ImGui_ImplGlfw_InitForVulkan(m_window, true);
     init_info.Instance = g_Instance;
     init_info.PhysicalDevice = g_PhysicalDevice;
     init_info.Device = g_Device;
@@ -88,7 +88,7 @@ Window::Window(int width, int height, const char *name) {
     ImGui_ImplVulkan_Init(&init_info);
 }
 
-Window::~Window() {
+window::~window() {
     VkResult err = vkDeviceWaitIdle(g_Device);
     check_vk_result(err);
     ImGui_ImplVulkan_Shutdown();
@@ -98,11 +98,11 @@ Window::~Window() {
     CleanupVulkanWindow();
     CleanupVulkan();
 
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(m_window);
     glfwTerminate();
 }
 
-void Window::run() {
+void window::run() {
     // Poll and handle events (inputs, window resize, etc.)
     // You can read the io.WantCaptureMouse, io.WantCaptureKeyboard flags to tell if dear imgui wants to use your inputs.
     // - When io.WantCaptureMouse is true, do not dispatch mouse input data to your main application, or clear/overwrite your copy of the mouse data.
@@ -112,7 +112,7 @@ void Window::run() {
 
     // Resize swap chain?
     int fb_width, fb_height;
-    glfwGetFramebufferSize(window, &fb_width, &fb_height);
+    glfwGetFramebufferSize(m_window, &fb_width, &fb_height);
     if (fb_width > 0 && fb_height > 0 &&
         (g_SwapChainRebuild || g_MainWindowData.Width != fb_width ||
          g_MainWindowData.Height != fb_height)) {
@@ -124,13 +124,13 @@ void Window::run() {
         g_SwapChainRebuild = false;
     }
 
-    if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
+    if (glfwGetWindowAttrib(m_window, GLFW_ICONIFIED) != 0) {
         ImGui_ImplGlfw_Sleep(10);
         return;
     }
 }
 
-void Window::render() {
+void window::render() {
     // Rendering
     ImGui::Render();
     ImDrawData *draw_data = ImGui::GetDrawData();
@@ -146,6 +146,6 @@ void Window::render() {
     }
 }
 
-bool Window::should_close() {
-    return glfwWindowShouldClose(window);
+bool window::should_close() {
+    return glfwWindowShouldClose(m_window);
 }

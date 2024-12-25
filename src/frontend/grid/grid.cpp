@@ -3,12 +3,11 @@
 #include "imgui_impl_glfw.h"
 using namespace grid_space;
 
-grid::grid(int rows, int cols, Window &window) : m_window(window) {
+grid::grid(int rows, int cols, window &window) : m_window(window) {
     // Set up grid
     m_rows = rows;
     m_cols = cols;
 
-    // Create col labels
     for (auto col = 0; col < cols; col++) {
         m_col_labels.push(label_data(col));
     }
@@ -41,6 +40,8 @@ grid::grid(int rows, int cols, Window &window) : m_window(window) {
     io.FontDefault = m_font;
 };
 
+// Eventually make this render only those rows and columns
+// that are actually visible
 void grid::draw() {
     if (!m_window.should_close()) {
         // Start the Dear ImGui frame

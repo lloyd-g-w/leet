@@ -58,14 +58,25 @@ void grid::draw_col_labels() {
         }
 
         if (m_col_labels.at(col)->is_resizing) {
-            if (ImGui::GetMousePos().x > buttonMin.x + 6.0f) {
-                set_column_width(col, ImGui::GetMousePos().x - buttonMin.x);
+            ImU32 colour = m_colours.get("active_blue").imgui();
+            if (ImGui::GetMousePos().x < buttonMin.x + 6.0f) {
+                colour = m_colours.get("red").imgui();
             }
-            ImGui::SetMouseCursor(
-                ImGuiMouseCursor_ResizeEW);  // Change cursor to resizer
+
+            // Draw vertical line at mouse cursor and down the column
+            ImGui::GetForegroundDrawList()->AddLine(
+                ImVec2(ImGui::GetMousePos().x, buttonMin.y),
+                ImVec2(ImGui::GetMousePos().x, ImGui::GetWindowSize().y),
+                colour, 1.5f);
+
+            // Change cursor to resizer
+            ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
         }
 
-        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
+            m_col_labels.at(col)->is_resizing) {
+            set_column_width(
+                col, std::max(6.0f, ImGui::GetMousePos().x - buttonMin.x));
             m_col_labels.at(col)->is_resizing = false;
         }
 
@@ -125,14 +136,25 @@ void grid::draw_row_label() {
     }
 
     if (row_label->is_resizing) {
-        if (ImGui::GetMousePos().y > buttonMin.y + 6.0f) {
-            set_row_height(row, ImGui::GetMousePos().y - buttonMin.y);
+        ImU32 colour = m_colours.get("active_blue").imgui();
+        if (ImGui::GetMousePos().y < buttonMin.y + 6.0f) {
+            colour = m_colours.get("red").imgui();
         }
-        ImGui::SetMouseCursor(
-            ImGuiMouseCursor_ResizeNS);  // Change cursor to resizer
+
+        // Draw line at cursor and across the row
+        ImGui::GetForegroundDrawList()->AddLine(
+            ImVec2(buttonMin.x, ImGui::GetMousePos().y),
+            ImVec2(ImGui::GetWindowSize().x, ImGui::GetMousePos().y), colour,
+            1.5f);
+
+        // Change cursor to resizer
+        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeNS);
     }
 
-    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+    if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
+        row_label->is_resizing) {
+        set_row_height(row,
+                       std::max(6.0f, ImGui::GetMousePos().y - buttonMin.y));
         row_label->is_resizing = false;
     }
 
@@ -227,6 +249,8 @@ void grid::draw_cell() {
         // Draw Text on Top of the Button
         drawList->AddText(textPos, m_colours.get("black").imgui(),
                           overlay.c_str());
+
+        drawList->PopClipRect();
 
         // Make raw value visible if double clicked
         if (ImGui::IsItemHovered() &&

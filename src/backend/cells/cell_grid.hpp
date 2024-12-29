@@ -1,8 +1,6 @@
 #pragma once
 
-#include <optional>
 #include <unordered_map>
-#include <vector>
 
 #include "cell.hpp"
 #include "common.hpp"
@@ -10,9 +8,7 @@
 namespace cells_std {
 
 // Typedefs
-typedef std::vector<std::optional<cell>> cell_row_t;
-typedef std::vector<cell_row_t> cell_grid_t;
-typedef std::unordered_map<str, cell> cell_map_t;
+typedef std::unordered_map<pos, cell, pos_hash> cell_map_t;
 
 class cell_grid {
   public:

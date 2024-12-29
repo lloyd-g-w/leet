@@ -2,7 +2,6 @@
 
 #include "common.hpp"
 #include "exceptions.hpp"
-
 using namespace cells_std;
 
 // -------------------- PUBLIC METHODS -------------------- //
@@ -13,16 +12,14 @@ const cell &cell_grid::get_cell(pos pos) {
     if (!is_set(pos)) {
         throw cells_std::cell_not_set();
     }
-    str ref = pos_to_str(pos);
-    return m_cells[ref];
+    return m_cells[pos];
 };
 
 cell &cell_grid::get_cell_mut(pos pos) {
     if (!is_set(pos)) {
         throw cells_std::cell_not_set();
     }
-    str ref = pos_to_str(pos);
-    return m_cells[ref];
+    return m_cells[pos];
 };
 
 void cell_grid::create_cell(pos pos) {
@@ -32,24 +29,21 @@ void cell_grid::create_cell(pos pos) {
     if (is_set(pos)) {
         throw cells_std::cell_already_set();
     }
-    str ref = pos_to_str(pos);
-    m_cells[ref] = cell();
+    m_cells[pos] = cell();
 }
 
 void cell_grid::set_cell(pos pos, cell cell) {
     if (!valid_pos(pos)) {
         throw cells_std::pos_out_of_range();
     }
-    str ref = pos_to_str(pos);
-    m_cells[ref] = cell;
+    m_cells[pos] = cell;
 }
 
 void cell_grid::delete_cell(pos pos) {
     if (!valid_pos(pos)) {
         throw cells_std::pos_out_of_range();
     }
-    str ref = pos_to_str(pos);
-    m_cells.erase(ref);
+    m_cells.erase(pos);
 }
 
 // Helper methods
@@ -101,13 +95,5 @@ bool cell_grid::valid_pos(pos pos) {
 
 // Helper methods
 bool cell_grid::is_set(pos pos) {
-    if (!valid_pos(pos)) {
-        throw cells_std::pos_out_of_range();
-    }
-    str ref = pos_to_str(pos);
-    if(m_cells.find(ref) != m_cells.end()) {
-        return true;
-    }
-
-    return false;
+    return m_cells.contains(pos);
 }

@@ -21,4 +21,10 @@ struct pos {
         return row == other.row && col == other.col;
     }
 };
+
+struct pos_hash {
+    std::size_t operator()(const pos &p) const {
+        return std::hash<int>()(p.row) ^ std::hash<int>()(p.col);
+    }
+};
 }  // namespace cells_std

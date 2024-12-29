@@ -1,7 +1,10 @@
+#include <chrono>
+#include <iostream>
 
 #include "../wrappers/imgui_wrappers.hpp"
 #include "grid_gui.hpp"
 #include "imgui_internal.h"
+
 using namespace cells_std;
 
 void grid_gui::draw_col_labels(int start_col, int end_col) {
@@ -31,7 +34,7 @@ void grid_gui::draw_col_labels(int start_col, int end_col) {
                                   m_colours.get("white").imgui());
         }
 
-        gui_cell_data *cell_data = m_gui_col_labels.at(col);
+        gui_label_data *cell_data = m_gui_col_labels.at(col);
 
         const float &label_width = cell_data->dimensions.width;
 
@@ -97,7 +100,7 @@ void grid_gui::draw_row_label(int row_index) {
     ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("white").imgui());
 
     int row = row_index;
-    gui_cell_data *row_label = m_gui_row_labels.at(row);
+    gui_label_data *row_label = m_gui_row_labels.at(row);
     const float &row_height = row_label->dimensions.height;
 
     bool is_active = m_active_cell.row == row;
@@ -164,23 +167,29 @@ void grid_gui::draw_row_label(int row_index) {
 }
 
 void grid_gui::draw_cell(pos cell_pos) {
-    auto gui_cell_data = m_gui_cell_data.at(cell_pos.row, cell_pos.col);
-
-    bool is_set = is_cell_set(cell_pos);
-
     str label = "##" + std::to_string(cell_pos.row) + "-" +
                 std::to_string(cell_pos.col);
 
-    // Create cell
+    bool is_set = is_cell_set(cell_pos);
+    float cell_width = m_gui_col_labels.at(cell_pos.col)->dimensions.width;
+    float cell_height = m_gui_row_labels.at(cell_pos.row)->dimensions.height;
+    gui_cell_data *gui_data;
+    cell *cell;
+
+    if (is_set) {
+        cell = &m_cell_grid.get_cell_mut(cell_pos);
+        if (cell->has_user_data())
+            gui_data = &cell->get_user_data_mut<gui_cell_data>();
+    } else {
+        gui_data = new gui_cell_data();
+    }
+
     ImGui::PushStyleColor(ImGuiCol_Button, m_colours.get("white").imgui());
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
                           m_colours.get("white").imgui());
     ImGui::PushStyleColor(ImGuiCol_ButtonActive,
                           m_colours.get("white").imgui());
     ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("black").imgui());
-
-    float cell_width = gui_cell_data->dimensions.width;
-    float cell_height = gui_cell_data->dimensions.height;
 
     // Ensure there is a white rectangle behind the cell
     ImVec2 rect_min = ImGui::GetCursorScreenPos();
@@ -191,11 +200,7 @@ void grid_gui::draw_cell(pos cell_pos) {
                                               0.0f, ImDrawFlags_None);
 
     // Draw the cell
-    if (gui_cell_data->is_editing) {
-        if (!is_set) {
-            m_cell_grid.create_cell(cell_pos);
-        }
-
+    if (gui_data->is_editing) {
         str &buffer = m_cell_grid.get_cell_mut(cell_pos).get_raw_mut();
 
         ImGui::PushStyleColor(ImGuiCol_FrameBg, m_colours.get("white").imgui());
@@ -205,22 +210,22 @@ void grid_gui::draw_cell(pos cell_pos) {
 
         ImGui::PopStyleColor();
 
-        if (gui_cell_data->is_focused) {
+        if (gui_data->is_focused) {
             // Parse the cell value upon deactivation
             // This check is required as setting focus
             // does not instantly activate item
             if (ImGui::IsItemDeactivated()) {
                 if (buffer.c_str()[0] == '\0') {
                     m_cell_grid.delete_cell(cell_pos);
+                } else {
+                    gui_data->is_editing = false;
+                    gui_data->is_focused = false;
                 }
-                gui_cell_data->is_editing = false;
-                gui_cell_data->is_focused = false;
             }
         } else {
             ImGui::SetKeyboardFocusHere(-1);
-            gui_cell_data->is_focused = true;
+            gui_data->is_focused = true;
         }
-
     } else {
         ImGui::Button(label.c_str(), ImVec2(cell_width, cell_height));
 
@@ -233,34 +238,27 @@ void grid_gui::draw_cell(pos cell_pos) {
         // Step 3: Draw Overlay Text Directly with DrawList
         ImDrawList *drawList = ImGui::GetForegroundDrawList();
 
-        /*
-        str overlay = cell_data->cell.is_computed() ?
-                          cell_data->cell.computed_value :
-                          cell_data->cell.raw_value;
-        */
         str overlay;
 
         if (!is_set) {
             overlay = "";
         } else {
-            overlay = m_cell_grid.get_cell_mut(cell_pos).get_raw();
+            overlay = cell->get_raw();
         }
 
-        ImVec2 textSize = ImGui::CalcTextSize(overlay.c_str());
-        ImVec2 textPos =
-            ImVec2(buttonMin.x + 5.0f, buttonCenter.y - textSize.y * 0.5f);
+        ImVec2 text_size = ImGui::CalcTextSize(overlay.c_str());
+        ImVec2 text_pos =
+            ImVec2(buttonMin.x + 5.0f, buttonCenter.y - text_size.y * 0.5f);
 
-        float dist = next_populated_dist(cell_pos);
+        float dist = next_populated_dist(cell_pos, text_size.x);
 
-        ImVec2 clip_rect_max =
-            ImVec2(buttonMax.x + next_populated_dist(cell_pos) -
-                       ImGui::GetStyle().FramePadding.x,
-                   buttonMax.y);
+        ImVec2 clip_rect_max = ImVec2(
+            buttonMax.x + dist - ImGui::GetStyle().FramePadding.x, buttonMax.y);
 
         drawList->PushClipRect(buttonMin, clip_rect_max, false);
 
         // Draw Text on Top of the Button
-        drawList->AddText(textPos, m_colours.get("black").imgui(),
+        drawList->AddText(text_pos, m_colours.get("black").imgui(),
                           overlay.c_str());
 
         drawList->PopClipRect();
@@ -268,7 +266,14 @@ void grid_gui::draw_cell(pos cell_pos) {
         // Make raw value visible if double clicked
         if (ImGui::IsItemHovered() &&
             ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            gui_cell_data->is_editing = true;
+            gui_data->is_editing = true;
+            if (!is_set) {
+                if (!is_set) {
+                    m_cell_grid.create_cell(cell_pos);
+                    m_cell_grid.get_cell_mut(cell_pos)
+                        .set_user_data<gui_cell_data>(*gui_data);
+                }
+            }
         }
     }
 
@@ -285,6 +290,10 @@ void grid_gui::draw_cell(pos cell_pos) {
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
         m_active_cell = cell_pos;
     }
+
+    if (!is_set) {
+        delete gui_data;
+    }
 }
 
 void grid_gui::draw_row(int row_index, int start_col, int end_col) {
@@ -296,10 +305,13 @@ void grid_gui::draw_row(int row_index, int start_col, int end_col) {
     }
 }
 
-float grid_gui::next_populated_dist(pos pos) {
+float grid_gui::next_populated_dist(pos pos, float max_dist) {
     float dist = 0.0;
 
     for (auto curr_col = pos.col + 1; curr_col < m_cols; curr_col++) {
+        if (dist >= max_dist) {
+            return max_dist;
+        }
         if (is_cell_set({pos.row, curr_col})) {
             return dist;
         }
@@ -320,17 +332,17 @@ bool grid_gui::is_cell_set(pos pos) {
 }
 
 void grid_gui::set_column_width(int col, float width) {
+    float diff = width - m_gui_col_labels.at(col)->dimensions.width;
+    m_grid_width += diff;
+
     m_gui_col_labels.at(col)->dimensions.width = width;
-    for (auto row = 0; row < m_rows; row++) {
-        m_gui_cell_data.at(row, col)->dimensions.width = width;
-    }
 }
 
 void grid_gui::set_row_height(int row, float height) {
+    float diff = height - m_gui_row_labels.at(row)->dimensions.height;
+    m_grid_height += diff;
+
     m_gui_row_labels.at(row)->dimensions.height = height;
-    for (auto col = 0; col < m_cols; col++) {
-        m_gui_cell_data.at(row, col)->dimensions.height = height;
-    }
 }
 
 std::array<cells_std::pos, 2> grid_gui::calc_visible_coords() {
@@ -406,8 +418,8 @@ void grid_gui::handle_scrolling() {
         float wheely = ImGui::GetIO().MouseWheel;
         float wheelx = ImGui::GetIO().MouseWheelH;
         m_scroll_y -= wheely * SCROLL_SPEED;
-        m_scroll_y = ImClamp(m_scroll_y, 0.0f, calc_grid_height());
+        m_scroll_y = ImClamp(m_scroll_y, 0.0f, m_grid_height);
         m_scroll_x -= wheelx * SCROLL_SPEED;
-        m_scroll_x = ImClamp(m_scroll_x, 0.0f, calc_grid_width());
+        m_scroll_x = ImClamp(m_scroll_x, 0.0f, m_grid_width);
     }
 }

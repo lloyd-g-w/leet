@@ -26,3 +26,4 @@ const str &cell::get_computed() {
 const cell_type_t &cell::get_type() {
     return m_type;
 }
+

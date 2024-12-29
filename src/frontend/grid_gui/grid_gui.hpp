@@ -20,38 +20,29 @@ const float DEFAULT_CELL_HEIGHT = 30.0;
 
 typedef struct gui_cell_data {
     // Variables
+    bool is_editing = false;
+    bool is_focused = false;
+
+} gui_cell_data;
+
+typedef struct gui_label_data {
+    // Variables
     dim_t dimensions;
     bool is_editing = false;
     bool is_focused = false;
 
     // Constructor
-    gui_cell_data(dim_t dims = {DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT})
+    gui_label_data(dim_t dims = {DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT})
         : dimensions(dims) {}
-} gui_cell_data;
-
-typedef struct gui_details_t {
-    // Variables
-    int rows, cols;
-    std::vector<std::vector<gui_cell_data>> data;
-
-    // Constructor
-    gui_details_t(int rows, int cols)
-        : rows(rows), cols(cols), data(rows, std::vector<gui_cell_data>(cols)) {
-    }
-
-    // Accessors
-    gui_cell_data *at(int row, int col) {
-        return &data.at(row).at(col);
-    }
-} gui_details_t;
+} gui_label_data;
 
 typedef struct label_details_t {
-    std::vector<gui_cell_data> data;
+    std::vector<gui_label_data> data;
 
     // Constructor
     label_details_t(int size) : data(size) {}
 
-    gui_cell_data *at(int index) {
+    gui_label_data *at(int index) {
         return &data.at(index);
     }
 } label_details_t;
@@ -67,7 +58,7 @@ class grid_gui {
     void draw();
 
     // Utils
-    float next_populated_dist(cells_std::pos pos);
+    float next_populated_dist(cells_std::pos pos, float max_dist = INFINITY);
     bool is_cell_set(cells_std::pos pos);
 
   private:
@@ -79,13 +70,12 @@ class grid_gui {
     // Main data
     int m_rows, m_cols;
     cells_std::cell_grid &m_cell_grid;
-    gui_details_t m_gui_cell_data;
     label_details_t m_gui_col_labels;
     label_details_t m_gui_row_labels;
 
     // Grid properties
-    float m_grid_height = 0.0;
-    float m_grid_width = 0.0;
+    float m_grid_height;
+    float m_grid_width;
 
     // Setup variables
     ImFont *m_font;

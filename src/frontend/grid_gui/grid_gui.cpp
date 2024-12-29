@@ -1,16 +1,19 @@
 #include "grid_gui.hpp"
-#include <array>
+#include <chrono>
+#include <iostream>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 
 grid_gui::grid_gui(cells_std::cell_grid &cell_grid, window &window)
     : m_window(window), m_cell_grid(cell_grid),
-      m_gui_cell_data(m_cell_grid.rows(), m_cell_grid.cols()),
       m_gui_col_labels(m_cell_grid.cols()),
       m_gui_row_labels(m_cell_grid.rows()) {
     m_rows = m_cell_grid.rows();
     m_cols = m_cell_grid.cols();
+
+    m_grid_height = (m_rows + 1) * DEFAULT_CELL_HEIGHT;
+    m_grid_width = (m_cols + 1) * DEFAULT_CELL_WIDTH;
 
     // Set ImGui style
     ImGuiStyle &style = ImGui::GetStyle();
@@ -59,12 +62,6 @@ void grid_gui::draw() {
             std::array<cells_std::pos, 2> visible_coords =
                 calc_visible_coords();
 
-            /*
-            std::array<cells_std::pos, 2> visible_coords;
-            visible_coords[0] = {0, 0};
-            visible_coords[1] = {m_rows - 1, m_cols - 1};
-            */
-
             handle_scrolling();
 
             // Draw col labels and then rows
@@ -73,7 +70,6 @@ void grid_gui::draw() {
                  row++) {
                 draw_row(row, visible_coords[0].col, visible_coords[1].col);
             }
-
             ImGui::End();
         }
     }

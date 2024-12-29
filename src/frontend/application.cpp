@@ -1,9 +1,11 @@
 #include "application.hpp"
 
+#define GRID_SHOW_FPS
+
 app::app(std::string window_name, int window_width, int window_height,
          int grid_rows, int grid_cols) {
-    int rows = 100;
-    int cols = 100;
+    int rows = 500000000;
+    int cols = 500000000;
     p_window = new window(1920, 1080, "Holy Sheet");
     p_cell_grid = new cells_std::cell_grid(rows, cols);
     p_grid_gui = new grid_gui(*p_cell_grid, *p_window);

@@ -1,15 +1,15 @@
+
 #include "../wrappers/imgui_wrappers.hpp"
-#include "grid.hpp"
+#include "grid_gui.hpp"
 #include "imgui_internal.h"
+using namespace cells_std;
 
-using namespace grid_space;
-
-void grid::draw_col_labels() {
+void grid_gui::draw_col_labels(int start_col, int end_col) {
     ImGui::Dummy(ImVec2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT));
     ImGui::SameLine(0.0f, 1.0f);
 
-    for (auto col = 0; col < m_cols; col++) {
-        str columnLabel = num_to_alpha(col + 1);
+    for (auto col = start_col; col <= end_col; col++) {
+        str columnLabel = cell_grid::num_to_alpha(col + 1);
 
         ImGui::PushStyleColor(ImGuiCol_Button, m_colours.get("grey").imgui());
         ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
@@ -31,11 +31,12 @@ void grid::draw_col_labels() {
                                   m_colours.get("white").imgui());
         }
 
-        // Make dynamic sizes
-        float *label_width = &m_col_labels.at(col)->dimensions.width;
+        gui_cell_data *cell_data = m_gui_col_labels.at(col);
+
+        const float &label_width = cell_data->dimensions.width;
 
         ImGui::Button(columnLabel.c_str(),
-                      ImVec2(*label_width, DEFAULT_CELL_HEIGHT));
+                      ImVec2(label_width, DEFAULT_CELL_HEIGHT));
 
         if (is_active) {
             ImGui::PopStyleColor(4);
@@ -53,11 +54,11 @@ void grid::draw_col_labels() {
                 ImGuiMouseCursor_ResizeEW);  // Change cursor to resizer
 
             if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-                m_col_labels.at(col)->is_resizing = true;
+                cell_data->is_editing = true;
             }
         }
 
-        if (m_col_labels.at(col)->is_resizing) {
+        if (cell_data->is_editing) {
             ImU32 colour = m_colours.get("active_blue").imgui();
             if (ImGui::GetMousePos().x < buttonMin.x + 6.0f) {
                 colour = m_colours.get("red").imgui();
@@ -74,30 +75,30 @@ void grid::draw_col_labels() {
         }
 
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
-            m_col_labels.at(col)->is_resizing) {
+            cell_data->is_editing) {
             set_column_width(
                 col, std::max(6.0f, ImGui::GetMousePos().x - buttonMin.x));
-            m_col_labels.at(col)->is_resizing = false;
+            cell_data->is_editing = false;
         }
 
         ImGui::PopStyleColor(4);
 
-        if (col < m_cols - 1) {
+        if (col < end_col) {
             ImGui::SameLine(0.0f, 1.0f);
         }
     }
 }
 
-void grid::draw_row_label() {
+void grid_gui::draw_row_label(int row_index) {
     ImGui::PushStyleColor(ImGuiCol_Button, m_colours.get("grey").imgui());
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
                           m_colours.get("grey").imgui());
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, m_colours.get("grey").imgui());
     ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("white").imgui());
 
-    int row = m_num_rows_drawn;
-    auto row_label = m_row_labels.at(row);
-    float *row_height = &row_label->dimensions.height;
+    int row = row_index;
+    gui_cell_data *row_label = m_gui_row_labels.at(row);
+    const float &row_height = row_label->dimensions.height;
 
     bool is_active = m_active_cell.row == row;
 
@@ -112,8 +113,8 @@ void grid::draw_row_label() {
     }
 
     // Make dynamic sizes
-    ImGui::Button(std::to_string(m_num_rows_drawn + 1).c_str(),
-                  ImVec2(DEFAULT_CELL_WIDTH, *row_height));
+    ImGui::Button(std::to_string(row + 1).c_str(),
+                  ImVec2(DEFAULT_CELL_WIDTH, row_height));
 
     if (is_active) {
         ImGui::PopStyleColor(4);
@@ -131,11 +132,11 @@ void grid::draw_row_label() {
             ImGuiMouseCursor_ResizeNS);  // Change cursor to resizer
 
         if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            row_label->is_resizing = true;
+            row_label->is_editing = true;
         }
     }
 
-    if (row_label->is_resizing) {
+    if (row_label->is_editing) {
         ImU32 colour = m_colours.get("active_blue").imgui();
         if (ImGui::GetMousePos().y < buttonMin.y + 6.0f) {
             colour = m_colours.get("red").imgui();
@@ -152,22 +153,20 @@ void grid::draw_row_label() {
     }
 
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
-        row_label->is_resizing) {
+        row_label->is_editing) {
         set_row_height(row,
                        std::max(6.0f, ImGui::GetMousePos().y - buttonMin.y));
-        row_label->is_resizing = false;
+        row_label->is_editing = false;
     }
 
     ImGui::PopStyleColor(4);
     ImGui::SameLine(0.0f, 1.0f);
 }
 
-void grid::draw_cell() {
-    int row = m_num_rows_drawn;
-    int col = m_num_cols_drawn++;
+void grid_gui::draw_cell(pos cell_pos) {
+    auto gui_cell_data = m_gui_cell_data.at(cell_pos.row, cell_pos.col);
 
-    pos cell_pos = {row, col};
-    auto cell_data = m_cells.at(row, col);
+    bool is_set = is_cell_set(cell_pos);
 
     str label = "##" + std::to_string(cell_pos.row) + "-" +
                 std::to_string(cell_pos.col);
@@ -180,8 +179,8 @@ void grid::draw_cell() {
                           m_colours.get("white").imgui());
     ImGui::PushStyleColor(ImGuiCol_Text, m_colours.get("black").imgui());
 
-    float cell_width = cell_data->dimensions.width;
-    float cell_height = cell_data->dimensions.height;
+    float cell_width = gui_cell_data->dimensions.width;
+    float cell_height = gui_cell_data->dimensions.height;
 
     // Ensure there is a white rectangle behind the cell
     ImVec2 rect_min = ImGui::GetCursorScreenPos();
@@ -192,29 +191,34 @@ void grid::draw_cell() {
                                               0.0f, ImDrawFlags_None);
 
     // Draw the cell
-    if (cell_data->is_editing) {
+    if (gui_cell_data->is_editing) {
+        if (!is_set) {
+            m_cell_grid.create_cell(cell_pos);
+        }
+
+        str &buffer = m_cell_grid.get_cell_mut(cell_pos).get_raw_mut();
+
         ImGui::PushStyleColor(ImGuiCol_FrameBg, m_colours.get("white").imgui());
 
         ImGui::SetNextItemWidth(cell_width);
-        ImGui::InputDynamicText(label.c_str(), &cell_data->cell.raw_value);
+        ImGui::InputDynamicText(label.c_str(), &buffer);
 
         ImGui::PopStyleColor();
 
-        if (cell_data->is_focused) {
+        if (gui_cell_data->is_focused) {
             // Parse the cell value upon deactivation
             // This check is required as setting focus
             // does not instantly activate item
             if (ImGui::IsItemDeactivated()) {
-                if (cell_data->cell.raw_value.c_str()[0] == '\0') {
-                    cell_data->cell.raw_value.clear();
+                if (buffer.c_str()[0] == '\0') {
+                    m_cell_grid.delete_cell(cell_pos);
                 }
-                cell_data->cell.parse();
-                cell_data->is_editing = false;
-                cell_data->is_focused = false;
+                gui_cell_data->is_editing = false;
+                gui_cell_data->is_focused = false;
             }
         } else {
             ImGui::SetKeyboardFocusHere(-1);
-            cell_data->is_focused = true;
+            gui_cell_data->is_focused = true;
         }
 
     } else {
@@ -229,9 +233,18 @@ void grid::draw_cell() {
         // Step 3: Draw Overlay Text Directly with DrawList
         ImDrawList *drawList = ImGui::GetForegroundDrawList();
 
+        /*
         str overlay = cell_data->cell.is_computed() ?
                           cell_data->cell.computed_value :
                           cell_data->cell.raw_value;
+        */
+        str overlay;
+
+        if (!is_set) {
+            overlay = "";
+        } else {
+            overlay = m_cell_grid.get_cell_mut(cell_pos).get_raw();
+        }
 
         ImVec2 textSize = ImGui::CalcTextSize(overlay.c_str());
         ImVec2 textPos =
@@ -255,7 +268,7 @@ void grid::draw_cell() {
         // Make raw value visible if double clicked
         if (ImGui::IsItemHovered() &&
             ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            cell_data->is_editing = true;
+            gui_cell_data->is_editing = true;
         }
     }
 
@@ -272,53 +285,129 @@ void grid::draw_cell() {
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
         m_active_cell = cell_pos;
     }
-
-    if (col < m_cols - 1)
-        ImGui::SameLine(0.0f, 1.0f);
 }
 
-void grid::draw_row() {
-    draw_row_label();
-    while (m_num_cols_drawn < m_cols) {
-        draw_cell();
+void grid_gui::draw_row(int row_index, int start_col, int end_col) {
+    draw_row_label(row_index);
+    for (auto col = start_col; col <= end_col; col++) {
+        draw_cell({row_index, col});
+        if (col < end_col)
+            ImGui::SameLine(0.0f, 1.0f);
     }
-    m_num_rows_drawn++;
-    m_num_cols_drawn = 0;
 }
 
-float grid::next_populated_dist(pos pos) {
+float grid_gui::next_populated_dist(pos pos) {
     float dist = 0.0;
+
     for (auto curr_col = pos.col + 1; curr_col < m_cols; curr_col++) {
-        auto curr_cell = m_cells.at(pos.row, curr_col);
-        if (curr_cell->is_populated()) {
+        if (is_cell_set({pos.row, curr_col})) {
             return dist;
         }
-        dist += curr_cell->dimensions.width;
+
+        dist += m_gui_col_labels.at(curr_col)->dimensions.width;
     }
 
     return dist;
 }
 
-void grid::set_column_width(int col, float width) {
-    m_col_labels.at(col)->dimensions.width = width;
+bool grid_gui::is_cell_set(pos pos) {
+    try {
+        m_cell_grid.get_cell(pos);
+        return true;
+    } catch (cells_std::cell_exception e) {
+        return false;
+    }
+}
+
+void grid_gui::set_column_width(int col, float width) {
+    m_gui_col_labels.at(col)->dimensions.width = width;
     for (auto row = 0; row < m_rows; row++) {
-        m_cells.at(row, col)->dimensions.width = width;
+        m_gui_cell_data.at(row, col)->dimensions.width = width;
     }
 }
 
-void grid::set_row_height(int row, float height) {
-    m_row_labels.at(row)->dimensions.height = height;
+void grid_gui::set_row_height(int row, float height) {
+    m_gui_row_labels.at(row)->dimensions.height = height;
     for (auto col = 0; col < m_cols; col++) {
-        m_cells.at(row, col)->dimensions.height = height;
+        m_gui_cell_data.at(row, col)->dimensions.height = height;
     }
 }
 
-str grid::num_to_alpha(int num) {
-    str res;
-    while (num > 0) {
-        num--;  // Adjust to make 1 → A instead of 0 → A
-        res.insert(res.begin(), 'A' + (num % 26));
-        num /= 26;
+std::array<cells_std::pos, 2> grid_gui::calc_visible_coords() {
+    float scroll_y = m_scroll_y;
+    float scroll_x = m_scroll_x;
+    float window_size_y = ImGui::GetWindowSize().y;
+    float window_size_x = ImGui::GetWindowSize().x;
+    float sum = 0.0;
+
+    // Rows
+    int first_visible_row = DEFAULT_CELL_HEIGHT;
+    for (int row = 0; row < m_rows; row++) {
+        sum += m_gui_row_labels.at(row)->dimensions.height;
+        first_visible_row = row;
+        if (sum > scroll_y) {
+            break;
+        }
     }
-    return res;
+
+    sum = 0.0;
+    int last_visible_row = first_visible_row;
+    for (int row = first_visible_row; row < m_rows; row++) {
+        sum += m_gui_row_labels.at(row)->dimensions.height;
+        last_visible_row = row;
+        if (sum > window_size_y) {
+            break;
+        }
+    }
+
+    // Columns
+    sum = DEFAULT_CELL_WIDTH;
+    int first_visible_col = 0;
+    for (int col = 0; col < m_cols; col++) {
+        sum += m_gui_col_labels.at(col)->dimensions.width;
+        first_visible_col = col;
+        if (sum > scroll_x) {
+            break;
+        }
+    }
+
+    sum = 0.0;
+    int last_visible_col = first_visible_col;
+    for (int col = first_visible_col; col < m_cols; col++) {
+        sum += m_gui_col_labels.at(col)->dimensions.width;
+        last_visible_col = col;
+        if (sum > window_size_x) {
+            break;
+        }
+    }
+
+    return {pos(first_visible_row, first_visible_col),
+            pos(last_visible_row, last_visible_col)};
+}
+
+float grid_gui::calc_grid_height() {
+    float height = DEFAULT_CELL_HEIGHT;
+    for (int row = 0; row < m_rows; row++) {
+        height += m_gui_row_labels.at(row)->dimensions.height;
+    }
+    return height;
+}
+
+float grid_gui::calc_grid_width() {
+    float width = DEFAULT_CELL_WIDTH;
+    for (int col = 0; col < m_cols; col++) {
+        width += m_gui_col_labels.at(col)->dimensions.width;
+    }
+    return width;
+}
+
+void grid_gui::handle_scrolling() {
+    if (ImGui::IsWindowHovered()) {
+        float wheely = ImGui::GetIO().MouseWheel;
+        float wheelx = ImGui::GetIO().MouseWheelH;
+        m_scroll_y -= wheely * SCROLL_SPEED;
+        m_scroll_y = ImClamp(m_scroll_y, 0.0f, calc_grid_height());
+        m_scroll_x -= wheelx * SCROLL_SPEED;
+        m_scroll_x = ImClamp(m_scroll_x, 0.0f, calc_grid_width());
+    }
 }

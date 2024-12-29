@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "grid/grid.hpp"
-#include "window/window.hpp"
+#include "grid_gui/grid_gui.hpp"
+#include "window_renderer/window.hpp"
 
 class app {
   public:
@@ -15,5 +15,6 @@ class app {
 
   private:
     window *p_window;
-    grid_space::grid *p_grid;
+    grid_gui *p_grid_gui;
+    cells_std::cell_grid *p_cell_grid;
 };

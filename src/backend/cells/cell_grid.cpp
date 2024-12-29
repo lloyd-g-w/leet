@@ -13,14 +13,16 @@ const cell &cell_grid::get_cell(pos pos) {
     if (!is_set(pos)) {
         throw cells_std::cell_not_set();
     }
-    return m_cells[pos.row][pos.col].value();
+    str ref = pos_to_str(pos);
+    return m_cells[ref];
 };
 
 cell &cell_grid::get_cell_mut(pos pos) {
     if (!is_set(pos)) {
         throw cells_std::cell_not_set();
     }
-    return m_cells[pos.row][pos.col].value();
+    str ref = pos_to_str(pos);
+    return m_cells[ref];
 };
 
 void cell_grid::create_cell(pos pos) {
@@ -30,21 +32,24 @@ void cell_grid::create_cell(pos pos) {
     if (is_set(pos)) {
         throw cells_std::cell_already_set();
     }
-    m_cells[pos.row][pos.col].emplace();
+    str ref = pos_to_str(pos);
+    m_cells[ref] = cell();
 }
 
 void cell_grid::set_cell(pos pos, cell cell) {
     if (!valid_pos(pos)) {
         throw cells_std::pos_out_of_range();
     }
-    m_cells[pos.row][pos.col] = cell;
+    str ref = pos_to_str(pos);
+    m_cells[ref] = cell;
 }
 
 void cell_grid::delete_cell(pos pos) {
     if (!valid_pos(pos)) {
         throw cells_std::pos_out_of_range();
     }
-    m_cells[pos.row][pos.col].reset();
+    str ref = pos_to_str(pos);
+    m_cells.erase(ref);
 }
 
 // Helper methods
@@ -99,9 +104,10 @@ bool cell_grid::is_set(pos pos) {
     if (!valid_pos(pos)) {
         throw cells_std::pos_out_of_range();
     }
-
-    if (m_cells[pos.row][pos.col].has_value()) {
+    str ref = pos_to_str(pos);
+    if(m_cells.find(ref) != m_cells.end()) {
         return true;
     }
+
     return false;
 }

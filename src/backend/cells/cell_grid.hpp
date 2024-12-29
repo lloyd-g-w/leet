@@ -17,7 +17,7 @@ typedef std::unordered_map<str, cell> cell_map_t;
 class cell_grid {
   public:
     cell_grid(int rows = 1000, int cols = 1000)
-        : m_rows(rows), m_cols(cols), m_cells(rows, cell_row_t(cols)) {}
+        : m_rows(rows), m_cols(cols), m_cells() {}
 
     // Main methods
     void create_cell(pos pos);
@@ -42,7 +42,7 @@ class cell_grid {
     // Members
     int m_rows;
     int m_cols;
-    cell_grid_t m_cells;
+    cell_map_t m_cells;
 
     // Helper methods
     bool is_set(pos pos);

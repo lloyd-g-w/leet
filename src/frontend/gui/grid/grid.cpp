@@ -1,17 +1,17 @@
-#include "grid_gui.hpp"
-#include <chrono>
-#include <iostream>
+#include "grid.hpp"
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 
-grid_gui::grid_gui(cells_std::cell_grid &cell_grid, window &window)
-    : m_window(window), m_cell_grid(cell_grid),
-      m_gui_col_labels(m_cell_grid.cols()),
-      m_gui_row_labels(m_cell_grid.rows()) {
-    m_rows = m_cell_grid.rows();
-    m_cols = m_cell_grid.cols();
+using namespace gui;
 
+grid::grid(std_cells::grid &cell_grid, window &window)
+    : m_window(window), m_cell_grid(cell_grid),
+      m_col_labels(m_cell_grid.get_cols()),
+      m_row_labels(m_cell_grid.get_rows()) {
+    // Setup grid dimensions
+    m_rows = m_cell_grid.get_rows();
+    m_cols = m_cell_grid.get_cols();
     m_grid_height = (m_rows + 1) * DEFAULT_CELL_HEIGHT;
     m_grid_width = (m_cols + 1) * DEFAULT_CELL_WIDTH;
 
@@ -29,9 +29,7 @@ grid_gui::grid_gui(cells_std::cell_grid &cell_grid, window &window)
     io.FontDefault = m_font;
 }
 
-// Eventually make this render only those rows and columns
-// that are actually visible
-void grid_gui::draw() {
+void grid::draw() {
     if (!m_window.should_close()) {
         // Start the Dear ImGui frame
         ImGui_ImplVulkan_NewFrame();
@@ -59,8 +57,7 @@ void grid_gui::draw() {
 
             ImGui::PopStyleColor();
 
-            std::array<cells_std::pos, 2> visible_coords =
-                calc_visible_coords();
+            rect_coords visible_coords = calc_visible_coords();
 
             handle_scrolling();
 

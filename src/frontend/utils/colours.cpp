@@ -1,6 +1,6 @@
 #include "colours.hpp"
 
-namespace colour_space {
+namespace colours {
 // -------------------- COLOUR CLASS --------------------
 colour::colour(int r, int g, int b, float a) {
     data = {r, g, b, a};
@@ -23,11 +23,11 @@ int colour::hex() {
 }
 
 vec4 colour::vec4() {
-    return colour_space::vec4(data.r, data.g, data.b, std::round(data.a * 255));
+    return colours::vec4(data.r, data.g, data.b, std::round(data.a * 255));
 }
 
 vec3 colour::vec3() {
-    return colour_space::vec3(data.r, data.g, data.b);
+    return colours::vec3(data.r, data.g, data.b);
 }
 
 unsigned int colour::imgui() {
@@ -37,13 +37,13 @@ unsigned int colour::imgui() {
 };
 
 // -------------------- COLOUR_GROUP CLASS --------------------
-colour_group::colour_group(std::initializer_list<preset> presets) {
+palette::palette(std::initializer_list<preset> presets) {
     for (auto preset : presets) {
         add_preset(preset);
     }
 }
 
-void colour_group::add(std::string name, colour colour) {
+void palette::add(std::string name, colour colour) {
     if (colours.find(name) != colours.end()) {
         return;
     }
@@ -51,11 +51,11 @@ void colour_group::add(std::string name, colour colour) {
     colours[name] = colour;
 };
 
-void colour_group::set(std::string name, colour colour) {
+void palette::set(std::string name, colour colour) {
     colours[name] = colour;
 };
 
-void colour_group::remove(std::string name) {
+void palette::remove(std::string name) {
     if (colours.find(name) == colours.end()) {
         return;
     }
@@ -63,21 +63,21 @@ void colour_group::remove(std::string name) {
     colours.erase(name);
 };
 
-colour colour_group::get(std::string name) {
+colour palette::get(std::string name) {
     if (colours.find(name) == colours.end()) {
         return colour();
     }
 
     return colours[name];
 };
-void colour_group::add_preset(preset preset) {
+void palette::add_preset(preset preset) {
     switch (preset) {
-        case BASIC_COLOURS: colour_group::add_basic_preset(); break;
-        case HOLY_SHEET: colour_group::add_holy_sheet(); break;
+        case BASIC_COLOURS: palette::add_basic_preset(); break;
+        case HOLY_SHEET: palette::add_holy_sheet(); break;
     }
 }
 
-void colour_group::add_basic_preset() {
+void palette::add_basic_preset() {
     add("white", colour(255, 255, 255));
     add("black", colour(0, 0, 0));
     add("red", colour(255, 0, 0));
@@ -111,8 +111,8 @@ void colour_group::add_basic_preset() {
     add("lavender", colour(230, 230, 250));
 }
 
-void colour_group::add_holy_sheet() {
-    colour_group::add_basic_preset();
+void palette::add_holy_sheet() {
+    palette::add_basic_preset();
     add("active_blue", colour(0, 119, 182));
 }
-}  // namespace colour_space
+}  // namespace colours

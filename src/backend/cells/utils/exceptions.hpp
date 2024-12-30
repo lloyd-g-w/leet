@@ -2,7 +2,7 @@
 
 #include "common.hpp"
 
-namespace cells_std {
+namespace std_cells {
 
 // Base exception class
 class cell_exception : public std::exception {
@@ -47,4 +47,4 @@ class invalid_syntax : public cell_exception {
     explicit invalid_syntax(const str &message = "Invalid syntax")
         : cell_exception(message) {};
 };
-}  // namespace cells_std
+}  // namespace std_cells

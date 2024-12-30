@@ -2,13 +2,14 @@
 #include <string>
 #include <unordered_map>
 
-namespace colour_space {
+namespace colours {
 class colour;
-class colour_group;
+class palette;
 
 // Standard types
-typedef std::string str;
-typedef std::unordered_map<str, colour> colour_map;
+using str = std::string;
+using colour_map = std::unordered_map<str, colour>;
+
 struct vec3 {
     int a, b, c;
     vec3(int a = 0, int b = 0, int c = 0) : a(a), b(b), c(c) {}
@@ -28,8 +29,8 @@ class colour {
 
     // Converters / Getters
     int hex();
-    colour_space::vec3 vec3();
-    colour_space::vec4 vec4();
+    colours::vec3 vec3();
+    colours::vec4 vec4();
     unsigned int imgui();
 
   private:
@@ -41,14 +42,14 @@ class colour {
     friend class colour_group;
 };
 
-class colour_group {
+class palette {
   public:
     enum preset {
         BASIC_COLOURS,
         HOLY_SHEET
     };
 
-    colour_group(std::initializer_list<preset> presets = {});
+    palette(std::initializer_list<preset> presets = {});
 
     // Actions
     void add(str name, colour colour);
@@ -62,4 +63,4 @@ class colour_group {
     void add_basic_preset();
     void add_holy_sheet();
 };
-}  // namespace colour_space
+}  // namespace colours

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
-namespace cells_std {
+namespace std_cells {
 
 // Commonly used types
 typedef std::string str;
@@ -27,4 +28,7 @@ struct pos_hash {
         return std::hash<int>()(p.row) ^ std::hash<int>()(p.col);
     }
 };
-}  // namespace cells_std
+
+// Constants
+const pos NULL_POS = {-1, -1};
+}  // namespace std_cells

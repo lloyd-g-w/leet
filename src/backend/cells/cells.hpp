@@ -1,5 +1,6 @@
 #pragma once
 
-#include "cell.hpp"
-#include "cell_grid.hpp"
-#include "exceptions.hpp"
+#include "cell/cell.hpp"
+#include "grid/grid.hpp"
+#include "utils/common.hpp"
+#include "utils/exceptions.hpp"

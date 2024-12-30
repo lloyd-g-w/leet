@@ -2,34 +2,32 @@
 
 #include <unordered_map>
 
-#include "cell.hpp"
-#include "common.hpp"
+#include "../cell/cell.hpp"
+#include "../utils/common.hpp"
 
-namespace cells_std {
+namespace std_cells {
 
 // Typedefs
 typedef std::unordered_map<pos, cell, pos_hash> cell_map_t;
 
-class cell_grid {
+class grid {
   public:
-    cell_grid(int rows = 1000, int cols = 1000)
+    grid(int rows = 1000, int cols = 1000)
         : m_rows(rows), m_cols(cols), m_cells() {}
 
     // Main methods
+    // Creation & deletion
     void create_cell(pos pos);
     void set_cell(pos pos, cell cell);
     void delete_cell(pos pos);
 
+    // Getters
     const cell &get_cell(pos pos);
     cell &get_cell_mut(pos pos);
-    const int &rows() {
-        return m_rows;
-    }
-    const int &cols() {
-        return m_cols;
-    }
+    const int get_rows();
+    const int get_cols();
 
-    // Helper methods
+    // Public helper methods
     static pos str_to_pos(str pos_str);
     static str pos_to_str(pos pos);
     static str num_to_alpha(int num);
@@ -40,9 +38,9 @@ class cell_grid {
     int m_cols;
     cell_map_t m_cells;
 
-    // Helper methods
+    // Private helper methods
     bool is_set(pos pos);
     bool valid_pos(pos pos);
 };
 
-}  // namespace cells_std
+}  // namespace std_cells

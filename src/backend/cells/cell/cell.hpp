@@ -2,11 +2,9 @@
 
 #include <memory>
 
-#include "common.hpp"
+#include "../utils/common.hpp"
 
-namespace cells_std {
-
-class cell;
+namespace std_cells {
 
 // Custom types and enums
 
@@ -20,6 +18,7 @@ enum cell_type_t {
     CELL_REFERENCE
 };
 
+// Main class
 class cell {
   public:
     cell(str value = "") : m_raw_value(value) {}
@@ -56,7 +55,7 @@ class cell {
     str m_raw_value;
     str m_computed_value = "";
     cell_type_t m_type = UNKNOWN;
-    std::shared_ptr<void> m_user_data;
+    std::shared_ptr<void> m_user_data = nullptr;
 
     // Main private methods
     v_str tokenize();
@@ -65,4 +64,4 @@ class cell {
     void set_computed(str value);
 };
 
-}  // namespace cells_std
+}  // namespace std_cells

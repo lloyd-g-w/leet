@@ -1,6 +1,6 @@
 #include "cell.hpp"
 
-using namespace cells_std;
+using namespace std_cells;
 
 // Public methods
 void cell::set_raw(str value) {

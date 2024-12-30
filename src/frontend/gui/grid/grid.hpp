@@ -21,9 +21,10 @@ class grid {
     bool is_cell_set(pos pos);
 
   private:
-    static constexpr float DEFAULT_CELL_WIDTH = 75.0;
-    static constexpr float DEFAULT_CELL_HEIGHT = 30.0;
-    static constexpr float DEFAULT_CELL_SPACING = 1.0;
+    float SCALE_FACTOR = 1.5;
+    float DEFAULT_CELL_WIDTH = 75.0 * SCALE_FACTOR;
+    float DEFAULT_CELL_HEIGHT = 30.0 * SCALE_FACTOR;
+    float DEFAULT_CELL_SPACING = 1.0 * SCALE_FACTOR;
 
     // Typedefs
     struct cell_props_t {
@@ -39,15 +40,15 @@ class grid {
         bool is_focused = false;
 
         // Constructor
-        label_props_t(dim_t dims = {DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT})
-            : dimensions(dims) {}
+        label_props_t(dim_t dims) : dimensions(dims) {}
     };
 
     struct label_group_t {
         std::vector<label_props_t> data;
 
         // Constructor
-        label_group_t(int size) : data(size) {}
+        label_group_t(int size, dim_t default_dims)
+            : data(size, default_dims) {}
 
         label_props_t *at(int index) {
             return &data.at(index);
@@ -60,12 +61,12 @@ class grid {
     float m_scroll_y = 0.0;
 
     // Main data
-    int m_rows, m_cols;
     std_cells::grid &m_cell_grid;
     label_group_t m_col_labels;
     label_group_t m_row_labels;
 
     // Grid properties
+    int m_rows, m_cols;
     float m_grid_height;
     float m_grid_width;
 

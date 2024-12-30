@@ -24,14 +24,20 @@ class cell {
     cell(str value = "") : m_raw_value(value) {}
 
     // Public methods
+    // Setters
     void set_raw(str value);
     void set_type(cell_type_t type);
+    // Getters
     const str &get_raw();
     str &get_raw_mut();
     const str &get_computed();
     const cell_type_t &get_type();
 
-    // User data
+    // User data methods
+    bool has_user_data() {
+        return m_user_data != nullptr;
+    }
+
     template <typename T> void set_user_data(const T &data) {
         m_user_data = std::make_shared<T>(data);
     }
@@ -42,10 +48,6 @@ class cell {
 
     template <typename T> T &get_user_data_mut() {
         return *std::static_pointer_cast<T>(m_user_data);
-    }
-
-    bool has_user_data() {
-        return m_user_data != nullptr;
     }
 
   private:
@@ -60,7 +62,6 @@ class cell {
     // Main private methods
     v_str tokenize();
     void parse();
-
     void set_computed(str value);
 };
 

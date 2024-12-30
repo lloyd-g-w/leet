@@ -7,8 +7,10 @@ using namespace gui;
 
 grid::grid(std_cells::grid &cell_grid, window &window)
     : m_window(window), m_cell_grid(cell_grid),
-      m_col_labels(m_cell_grid.get_cols()),
-      m_row_labels(m_cell_grid.get_rows()) {
+      m_col_labels(m_cell_grid.get_cols(),
+                   {DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT}),
+      m_row_labels(m_cell_grid.get_rows(),
+                   {DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT}) {
     // Setup grid dimensions
     m_rows = m_cell_grid.get_rows();
     m_cols = m_cell_grid.get_cols();
@@ -19,7 +21,7 @@ grid::grid(std_cells::grid &cell_grid, window &window)
     ImGuiStyle &style = ImGui::GetStyle();
     ImGuiIO &io = ImGui::GetIO();
 
-    style.ItemSpacing = ImVec2(1.0f, 1.0f);
+    style.ItemSpacing = ImVec2(DEFAULT_CELL_SPACING, DEFAULT_CELL_SPACING);
 
     // Load font and set as default
     m_font = io.Fonts->AddFontFromFileTTF(

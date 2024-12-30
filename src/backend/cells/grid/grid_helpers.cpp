@@ -4,6 +4,7 @@ using namespace std_cells;
 
 // -------------------- PUBLIC METHODS -------------------- //
 
+// Converts a string like "AB23" to a position
 pos grid::str_to_pos(str pos_str) {
     str letters;
     str numbers;
@@ -26,10 +27,12 @@ pos grid::str_to_pos(str pos_str) {
     return pos(letter_num, numbers.empty() ? 0 : std::stoi(numbers));
 }
 
+// Converts a position to a string like "AB23"
 str grid::pos_to_str(pos pos) {
     return num_to_alpha(pos.row + 1) + std::to_string(pos.col + 1);
 }
 
+// Converts a number to an Excel-like column name
 str grid::num_to_alpha(int num) {
     str res;
     while (num > 0) {
@@ -48,7 +51,6 @@ bool grid::valid_pos(pos pos) {
     }
     return true;
 }
-
 
 bool grid::is_set(pos pos) {
     return m_cells.contains(pos);

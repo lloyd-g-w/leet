@@ -7,7 +7,7 @@ using namespace gui;
 void grid::draw_col_labels(int start_col, int end_col) {
     // Create a dummy cell to align the column labels
     ImGui::Dummy(ImVec2(DEFAULT_CELL_WIDTH, DEFAULT_CELL_HEIGHT));
-    ImGui::SameLine(0.0f, DEFAULT_CELL_SPACING);
+    ImGui::SameLine();
 
     for (auto col = start_col; col <= end_col; col++) {
         str label_str = std_cells::grid::num_to_alpha(col + 1);
@@ -47,8 +47,8 @@ void grid::draw_col_labels(int start_col, int end_col) {
         ImVec2 buttonMax = ImGui::GetItemRectMax();
 
         bool on_right_edge =
-            ImGui::IsMouseHoveringRect(ImVec2(buttonMax.x - 3.0f, buttonMin.y),
-                                       ImVec2(buttonMax.x + 3.0f, buttonMax.y));
+            ImGui::IsMouseHoveringRect(ImVec2(buttonMax.x - 3.0f * SCALE_FACTOR, buttonMin.y),
+                                       ImVec2(buttonMax.x + 3.0f * SCALE_FACTOR, buttonMax.y));
 
         if (on_right_edge) {
             ImGui::SetMouseCursor(
@@ -61,7 +61,7 @@ void grid::draw_col_labels(int start_col, int end_col) {
 
         if (label_data->is_editing) {
             ImU32 colour = m_colours.get("active_blue").imgui();
-            if (ImGui::GetMousePos().x < buttonMin.x + 6.0f) {
+            if (ImGui::GetMousePos().x < buttonMin.x + 6.0f * SCALE_FACTOR) {
                 colour = m_colours.get("red").imgui();
             }
 
@@ -78,14 +78,14 @@ void grid::draw_col_labels(int start_col, int end_col) {
         if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
             label_data->is_editing) {
             set_column_width(
-                col, std::max(6.0f, ImGui::GetMousePos().x - buttonMin.x));
+                col, std::max(6.0f * SCALE_FACTOR, ImGui::GetMousePos().x - buttonMin.x));
             label_data->is_editing = false;
         }
 
         ImGui::PopStyleColor(4);
 
         if (col < end_col) {
-            ImGui::SameLine(0.0f, 1.0f);
+            ImGui::SameLine();
         }
     }
 }
@@ -125,8 +125,8 @@ void grid::draw_row_label(int row_index) {
     ImVec2 buttonMax = ImGui::GetItemRectMax();
 
     bool on_bottom_edge =
-        ImGui::IsMouseHoveringRect(ImVec2(buttonMin.x, buttonMax.y - 3.0f),
-                                   ImVec2(buttonMax.x, buttonMax.y + 3.0f));
+        ImGui::IsMouseHoveringRect(ImVec2(buttonMin.x, buttonMax.y - 3.0f * SCALE_FACTOR),
+                                   ImVec2(buttonMax.x, buttonMax.y + 3.0f * SCALE_FACTOR));
 
     if (on_bottom_edge) {
         ImGui::SetMouseCursor(
@@ -139,7 +139,7 @@ void grid::draw_row_label(int row_index) {
 
     if (row_label->is_editing) {
         ImU32 colour = m_colours.get("active_blue").imgui();
-        if (ImGui::GetMousePos().y < buttonMin.y + 6.0f) {
+        if (ImGui::GetMousePos().y < buttonMin.y + 6.0f * SCALE_FACTOR) {
             colour = m_colours.get("red").imgui();
         }
 
@@ -156,12 +156,12 @@ void grid::draw_row_label(int row_index) {
     if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) &&
         row_label->is_editing) {
         set_row_height(row,
-                       std::max(6.0f, ImGui::GetMousePos().y - buttonMin.y));
+                       std::max(6.0f * SCALE_FACTOR, ImGui::GetMousePos().y - buttonMin.y));
         row_label->is_editing = false;
     }
 
     ImGui::PopStyleColor(4);
-    ImGui::SameLine(0.0f, 1.0f);
+    ImGui::SameLine();
 }
 
 void grid::draw_cell(pos cell_pos) {
@@ -281,7 +281,7 @@ void grid::draw_cell(pos cell_pos) {
     if (m_active_cell == cell_pos) {
         ImGui::GetWindowDrawList()->AddRect(
             rect_min, rect_max, m_colours.get("active_blue").imgui(), 0.0f,
-            ImDrawFlags_None, 2.0f);
+            ImDrawFlags_None, 2.0f * SCALE_FACTOR);
     }
 
     if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
@@ -298,7 +298,7 @@ void grid::draw_row(int row_index, int start_col, int end_col) {
     for (auto col = start_col; col <= end_col; col++) {
         draw_cell({row_index, col});
         if (col < end_col)
-            ImGui::SameLine(0.0f, 1.0f);
+            ImGui::SameLine();
     }
 }
 

@@ -1,7 +1,8 @@
 #pragma once
 
 #include <array>
-#include "../utils/colours.hpp"
+
+#include "../utils/colours/colours.hpp"
 #include "holy-sheet/src/backend/cells/utils/common.hpp"
 
 namespace gui {

@@ -43,4 +43,16 @@ int InputDynamicText(const char *label, std::string *buf,
                             ImGuiInputTextFlags_CallbackResize | flags,
                             CallbackHandler, &userCallbackData);
 }
+
+int InputDynamicTextMultiline(const char *label, std::string *buf,
+                              const ImVec2 &size, ImGuiInputTextFlags flags,
+                              ImGuiInputTextCallback callback,
+                              void *user_data) {
+    auto userCallbackData = std::make_pair(buf, callback);
+
+    return ImGui::InputTextMultiline(label, buf->data(), buf->size() + 1, size,
+                                     ImGuiInputTextFlags_CallbackResize | flags,
+                                     CallbackHandler, &userCallbackData);
+}
+
 }  // namespace ImGui

@@ -7,6 +7,7 @@
 #include "imgui_impl_vulkan.h"
 #define GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_VULKAN
+#define APP_USE_UNLIMITED_FRAME_RATE
 #include <GLFW/glfw3.h>
 
 class window {
@@ -303,7 +304,7 @@ class window {
                                             VK_PRESENT_MODE_IMMEDIATE_KHR,
                                             VK_PRESENT_MODE_FIFO_KHR};
 #else
-        VkPresentModeKHR present_modes[] = {VK_PRESENT_MODE_IMMEDIATE_KHR};
+        VkPresentModeKHR present_modes[] = {VK_PRESENT_MODE_FIFO_KHR};
 #endif
         wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(
             g_PhysicalDevice, wd->Surface, &present_modes[0],

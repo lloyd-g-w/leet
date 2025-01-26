@@ -1,4 +1,5 @@
 #include "grid.hpp"
+#include "imgui.h"
 #include "imgui_internal.h"
 
 using namespace gui;
@@ -216,3 +217,4 @@ void grid::handle_resize(axis_t axis, int index, label_props_t *label_data) {
         default: break;
     }
 }
+

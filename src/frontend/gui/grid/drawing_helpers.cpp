@@ -80,9 +80,8 @@ void grid::draw_cell(pos cell_pos) {
         // This ensures there is a white backgroud
         // even when the textbox isnt the correct height
         push_cell_style();
-        ImGui::InputDynamicTextMultiline(cell_label.c_str(), &buffer,
-                                         ImVec2(cell_width, cell_height),
-                                         ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::InputSizedDynamicText(cell_label.c_str(), &buffer,
+                                     ImVec2(cell_width, cell_height));
         pop_cell_style();
 
         if (gui_data->is_focused) {

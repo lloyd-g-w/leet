@@ -303,7 +303,7 @@ class window {
                                             VK_PRESENT_MODE_IMMEDIATE_KHR,
                                             VK_PRESENT_MODE_FIFO_KHR};
 #else
-        VkPresentModeKHR present_modes[] = {VK_PRESENT_MODE_FIFO_KHR};
+        VkPresentModeKHR present_modes[] = {VK_PRESENT_MODE_IMMEDIATE_KHR};
 #endif
         wd->PresentMode = ImGui_ImplVulkanH_SelectPresentMode(
             g_PhysicalDevice, wd->Surface, &present_modes[0],

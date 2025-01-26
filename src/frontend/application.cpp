@@ -1,7 +1,5 @@
 #include "application.hpp"
 
-#define GRID_SHOW_FPS
-
 app::app(std::string window_name, int window_width, int window_height,
          int grid_rows, int grid_cols) {
     int rows = 500;

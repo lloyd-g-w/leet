@@ -37,6 +37,9 @@ grid::grid(std_cells::grid &cell_grid, window &window)
     m_font->FontSize = font_size;
     io.FontDefault = m_font;
     io.FontGlobalScale = 1.0 / 10;
+
+    // Add some default colours
+    this->m_colours.add_preset(colours::palette::HOLY_SHEET);
 }
 
 void grid::draw() {
@@ -101,9 +104,13 @@ void grid::draw() {
             ImGui::SetNextItemWidth(DEFAULT_CELL_WIDTH);
             ImGui::SliderInt("##zoom%", &m_scale_percent, 50, 250, "%d %");
 
+            // Fps and frame time
+            ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);
+            ImGui::Text("Frame time: %.3f ms/frame",
+                        1000.0f / ImGui::GetIO().Framerate);
+
             ImGui::End();
             ImGui::PopFont();
-
             // END TEMP SCALE
         }
     }

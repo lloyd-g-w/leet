@@ -1,6 +1,7 @@
 #include "imgui_wrappers.hpp"
 
 #include "imgui.h"
+#include "imgui_internal.h"
 
 namespace ImGui {
 
@@ -19,11 +20,24 @@ static int ResizeCallback(ImGuiInputTextCallbackData *data) {
     return 0;
 }
 
+static int ExitOnReturnCallback(ImGuiInputTextCallbackData *data) {
+    if (data->EventChar == '\n' || data->EventChar == '\r') {
+        data->EventChar = '\0';
+        ImGui::ClearActiveID();
+        return 1;
+    }
+    return 0;
+}
+
 static int CallbackHandler(ImGuiInputTextCallbackData *data) {
     auto *userData = static_cast<InputTextUserData *>(data->UserData);
 
     if (data->EventFlag == ImGuiInputTextFlags_CallbackResize) {
         ResizeCallback(data);
+    }
+
+    if (data->EventFlag == ImGuiInputTextFlags_CallbackCharFilter) {
+        ExitOnReturnCallback(data);
     }
 
     if (userData->callback) {
@@ -53,6 +67,16 @@ int InputDynamicTextMultiline(const char *label, std::string *buf,
     return ImGui::InputTextMultiline(label, buf->data(), buf->size() + 1, size,
                                      ImGuiInputTextFlags_CallbackResize | flags,
                                      CallbackHandler, &userCallbackData);
+}
+
+int InputSizedDynamicText(const char *label, std::string *buf,
+                          const ImVec2 &size, ImGuiInputTextFlags flags,
+                          ImGuiInputTextCallback callback, void *user_data) {
+    auto userCallbackData = std::make_pair(buf, callback);
+
+    return ImGui::InputDynamicTextMultiline(
+        label, buf, size, ImGuiInputTextFlags_CallbackCharFilter | flags, NULL,
+        &userCallbackData);
 }
 
 }  // namespace ImGui

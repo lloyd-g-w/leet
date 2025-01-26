@@ -63,9 +63,9 @@ struct draw_info {
 };
 
 // ==================== CONSTS ==================== //
-constexpr float DEFAULT_CELL_WIDTH = 75.0;
-constexpr float DEFAULT_CELL_HEIGHT = 30.0;
-constexpr float DEFAULT_CELL_SPACING = 1.5;
+constexpr float DEFAULT_CELL_WIDTH = 120;
+constexpr float DEFAULT_CELL_HEIGHT = 45;
+constexpr float DEFAULT_CELL_SPACING = 2;
 
 // ==================== GRID CLASS ==================== //
 class grid {
@@ -108,7 +108,7 @@ class grid {
 
     // Setup variables
     ImFont *m_font;
-    palette m_colours = {colour_preset::HOLY_SHEET};
+    palette m_colours;
     window &m_window;
 
     // ==================== METHODS ==================== //

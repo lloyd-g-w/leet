@@ -50,7 +50,7 @@ void grid::draw() {
         ImGui::NewFrame();
 
         {
-            m_font->Scale = m_scale_percent / 100.0;
+            m_font->Scale = m_scale_percent / 105.0;
             ImGui::PushFont(m_font);
             // Make the window fill the entire screen
             ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -102,7 +102,7 @@ void grid::draw() {
             ImGui::Begin("Info", nullptr);
 
             ImGui::SetNextItemWidth(DEFAULT_CELL_WIDTH);
-            ImGui::SliderInt("##zoom%", &m_scale_percent, 50, 250, "%d %");
+            ImGui::SliderInt("##zoom%", &m_scale_percent, 75, 300, "%d %");
 
             // Fps and frame time
             ImGui::Text("FPS: %.1f", ImGui::GetIO().Framerate);

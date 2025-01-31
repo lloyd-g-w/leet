@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 #include "../cell/cell.hpp"
-#include "../utils/common.hpp"
+#include "../common.hpp"
 
 namespace std_cells {
 
@@ -16,10 +16,11 @@ class grid {
         : m_rows(rows), m_cols(cols), m_cells() {}
 
     // Main methods
-    // Creation & deletion
+    // Creation, deletion, and evaluation
     void create_cell(pos pos);
     void set_cell(pos pos, cell cell);
     void delete_cell(pos pos);
+    void evaluate_cell(pos pos);
 
     // Getters
     const cell &get_cell(pos pos);

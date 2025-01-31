@@ -14,7 +14,7 @@ void cell::set_type(cell_type_t type) {
 }
 
 // -------------------- GETTERS -------------------- //
-const str &cell::get_raw() {
+const str &cell::get_raw() const {
     return m_raw_value;
 }
 
@@ -22,10 +22,10 @@ str &cell::get_raw_mut() {
     return m_raw_value;
 }
 
-const str &cell::get_computed() {
+const str &cell::get_computed() const {
     return m_computed_value;
 }
 
-const cell_type_t &cell::get_type() {
+const cell_type_t &cell::get_type() const {
     return m_type;
 }

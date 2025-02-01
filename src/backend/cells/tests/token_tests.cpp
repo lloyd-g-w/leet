@@ -12,11 +12,11 @@ int main(int argc, char *argv[]) {
     auto res = std_cells::tokenize(input);
     std::cout << res.size() << " tokens: " << std::endl;
     std::cout << '[';
-    cout << '"' << res.front() << '"';
+    cout << '"' << res.front().value << '"';
     res.erase(res.begin());
     for (auto token : res) {
         cout << ", ";
-        cout << '"' << token << '"';
+        cout << '"' << token.value << '"';
     }
     std::cout << ']' << std::endl;
     return 0;

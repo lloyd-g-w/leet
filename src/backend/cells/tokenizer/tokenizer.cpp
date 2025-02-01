@@ -1,21 +1,19 @@
+#include "tokenizer.hpp"
 #include <cctype>
 #include <sstream>
 
-#include "../common.hpp"
-
 namespace std_cells {
 
-static v_str tokenize(str string);
 static bool isparen(char c);
 static bool isquote(char c);
 static bool isoperator(char c);
-static str tokenize_number(std::stringstream &ss);
-static str tokenize_string(std::stringstream &ss);
-static str tokenize_identifier(std::stringstream &ss);
+static tok tokenize_number(std::stringstream &ss);
+static tok tokenize_string(std::stringstream &ss);
+static tok tokenize_identifier(std::stringstream &ss);
 
 // Tokenize a string | can throw an exception
-v_str tokenize(str string) {
-    v_str tokens;
+v_tok tokenize(str string) {
+    v_tok tokens;
 
     std::stringstream ss;
     ss << string;
@@ -33,13 +31,10 @@ v_str tokenize(str string) {
         }
 
         if (isparen(c) || isoperator(c) || c == ',' || c == ':') {
-            tokens.push_back(str(1, c));
+            tokens.push_back(tok{tok::type::PUNCTUATION, str(1, c)});
             ss.ignore();
         } else if (isquote(c)) {
-            tokens.push_back(str(1, c));
             tokens.push_back(tokenize_string(ss));
-            ss >> c;
-            tokens.push_back(str(1, c));
         } else if (isdigit(c)) {
             tokens.push_back(tokenize_number(ss));
         } else if (isalnum(c)) {
@@ -65,40 +60,52 @@ static bool isoperator(char c) {
     return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
 }
 
-static str tokenize_number(std::stringstream &ss) {
-    str token;
+static tok tokenize_number(std::stringstream &ss) {
+    str tok_str;
+    auto type = tok::type::INT;
     char c;
+
+    int dot_count = 0;
 
     while ((c = ss.peek()) != EOF) {
         if (isdigit(c) || c == '.') {
-            token += c;
+            if (c == '.') {
+                type = tok::type::FLOAT;
+                dot_count++;
+            }
+
+            tok_str += c;
             ss.ignore();
         } else {
             break;
         }
     }
 
-    return token;
+    if (dot_count > 1)
+        throw std_cells::exception::invalid_syntax("Invalid number format");
+
+    return tok{type, tok_str};
 }
 
-static str tokenize_string(std::stringstream &ss) {
-    str token;
+static tok tokenize_string(std::stringstream &ss) {
+    str tok_str;
     char c;
 
     char quote_type;
     ss >> quote_type;
+    tok_str += quote_type;
 
     while ((c = ss.peek()) != EOF) {
         if (c == quote_type) {
-            if (token.back() == '\\') {
-                token.pop_back();
-                token += c;
+            if (tok_str.back() == '\\') {
+                tok_str.pop_back();
+                tok_str += c;
                 ss.ignore();
             } else {
                 break;
             }
         } else {
-            token += c;
+            tok_str += c;
             ss.ignore();
         }
     }
@@ -107,23 +114,26 @@ static str tokenize_string(std::stringstream &ss) {
         throw std_cells::exception::invalid_syntax(
             "Expected closing quote for string");
 
-    return token;
+    tok_str += c;
+    ss.ignore();
+
+    return tok{tok::type::STRING, tok_str};
 }
 
-static str tokenize_identifier(std::stringstream &ss) {
-    str token;
+static tok tokenize_identifier(std::stringstream &ss) {
+    str tok_str;
     char c;
 
     while ((c = ss.peek()) != EOF) {
         if (isalnum(c)) {
-            token += c;
+            tok_str += c;
             ss.ignore();
         } else {
             break;
         }
     }
 
-    return token;
+    return tok{tok::type::IDENTIFIER, tok_str};
 }
 
 }  // namespace std_cells

@@ -11,6 +11,11 @@ static void print_ast(std_cells::ast_node &node,
 static void print_ast_sexpr(const std_cells::ast_node &node);
 
 int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " <input>" << std::endl;
+        return EXIT_FAILURE;
+    }
+
     string input = string(argv[1]);
     std::cout << "INPUT: " << '\n' << input << '\n' << std::endl;
 

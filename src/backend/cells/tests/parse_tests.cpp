@@ -9,6 +9,7 @@ using namespace std;
 static void print_ast(std_cells::ast_node &node,
                       const std_cells::str &prefix = "", bool is_tail = true);
 static void print_ast_sexpr(const std_cells::ast_node &node);
+static std_cells::str type_enum_to_string(enum std_cells::ast_struct::type t);
 
 int main(int argc, char *argv[]) {
     if (argc != 2) {
@@ -47,8 +48,8 @@ int main(int argc, char *argv[]) {
 
 static void print_ast(std_cells::ast_node &node, const std_cells::str &prefix,
                       bool is_tail) {
-    std::cout << prefix << (is_tail ? "└── " : "├── ") << node->value
-              << std::endl;
+    std::cout << prefix << (is_tail ? "└── " : "├── ") << node->value << " : "
+              << type_enum_to_string(node->type) << std::endl;
 
     for (size_t i = 0; i < node->children.size(); i++) {
         bool last_child = (i == node->children.size() - 1);
@@ -64,4 +65,17 @@ static void print_ast_sexpr(const std_cells::ast_node &node) {
         print_ast_sexpr(child);
     }
     std::cout << ")";
+}
+
+static std_cells::str type_enum_to_string(enum std_cells::ast_struct::type t) {
+    using type = enum std_cells::ast_struct::type;
+    switch (t) {
+        case type::FUNCTION: return "FN";
+        case type::OPERATOR: return "OP";
+        case type::INT: return "INT";
+        case type::FLOAT: return "FLT";
+        case type::STRING: return "STR";
+        case type::CELL_REFERENCE: return "REF";
+        default: return "UNKNOWN";
+    }
 }

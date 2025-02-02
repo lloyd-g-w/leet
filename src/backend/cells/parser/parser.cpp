@@ -69,6 +69,7 @@ static ast_node parse(q_ast &queue) {
                 ast_node identifier = std::make_unique<ast_struct>();
                 identifier->type = ast_struct::type::FUNCTION;
                 identifier->value = token.value;
+                std::cout << "Function: " << token.value << std::endl;
 
                 parse_arguments(identifier, sub_queue);
 

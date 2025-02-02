@@ -12,8 +12,8 @@ static tok tokenize_string(std::stringstream &ss);
 static tok tokenize_identifier(std::stringstream &ss);
 
 // Tokenize a string | can throw an exception
-v_tok tokenize(str string) {
-    v_tok tokens;
+q_tok tokenize(str string) {
+    q_tok tokens;
 
     std::stringstream ss;
     ss << string;
@@ -31,7 +31,7 @@ v_tok tokenize(str string) {
         }
 
         if (isparen(c) || isoperator(c) || c == ',' || c == ':') {
-            tokens.push_back(tok{tok::type::PUNCTUATION, str(1, c)});
+            tokens.push_back({tok::type::PUNCTUATION, str(1, c)});
             ss.ignore();
         } else if (isquote(c)) {
             tokens.push_back(tokenize_string(ss));
@@ -122,6 +122,7 @@ static tok tokenize_string(std::stringstream &ss) {
 
 static tok tokenize_identifier(std::stringstream &ss) {
     str tok_str;
+    enum tok::type tok_type = tok::type::CELL_REFERENCE;
     char c;
 
     while ((c = ss.peek()) != EOF) {
@@ -129,11 +130,14 @@ static tok tokenize_identifier(std::stringstream &ss) {
             tok_str += c;
             ss.ignore();
         } else {
+            if (c == '(') {
+                tok_type = tok::type::FUNCTION;
+            }
             break;
         }
     }
 
-    return tok{tok::type::IDENTIFIER, tok_str};
+    return tok{tok_type, tok_str};
 }
 
 }  // namespace std_cells

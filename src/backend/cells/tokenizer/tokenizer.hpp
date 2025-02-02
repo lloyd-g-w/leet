@@ -1,3 +1,7 @@
+#pragma once
+
+#include <deque>
+
 #include "../common.hpp"
 
 namespace std_cells {
@@ -9,11 +13,12 @@ struct tok {
         INT,
         FLOAT,
         STRING,
-        IDENTIFIER
+        FUNCTION,
+        CELL_REFERENCE
     } type;
     str value;
 };
 
-typedef std::vector<tok> v_tok;
-v_tok tokenize(str string);
+typedef std::deque<tok> q_tok;
+q_tok tokenize(str string);
 }  // namespace std_cells

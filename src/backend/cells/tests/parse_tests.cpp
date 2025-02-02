@@ -36,11 +36,11 @@ int main(int argc, char *argv[]) {
 
     std::cout << "AST (GRAPH):" << std::endl;
     auto ast = std_cells::parse_tokens(res);
-    print_ast(ast);
+    ast->print();
     std::cout << std::endl;
 
     std::cout << "AST (S-EXPR):" << std::endl;
-    print_ast_sexpr(ast);
+    ast->print_sexpr();
     std::cout << std::endl;
 
     return 0;

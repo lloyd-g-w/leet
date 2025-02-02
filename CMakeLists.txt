@@ -40,7 +40,7 @@ include_directories(${GLFW_DIR}/deps)
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 file(GLOB_RECURSE sources "${SRC_DIR}/*.cpp")
-
+list(FILTER sources EXCLUDE REGEX ".*/tests/.*")
 
 add_executable(
   holy-sheet

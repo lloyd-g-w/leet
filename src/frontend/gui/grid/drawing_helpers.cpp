@@ -203,7 +203,7 @@ bool grid::is_cell_set(pos pos) {
     try {
         m_cell_grid.get_cell(pos);
         return true;
-    } catch (std_cells::cell_exception e) {
+    } catch (std_cells::exception::cell_exception e) {
         return false;
     }
 }

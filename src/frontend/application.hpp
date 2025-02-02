@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "../backend/cells/cells.hpp"
+#include "../backend/grid/grid.hpp"
 #include "gui/gui.hpp"
 #include "window_renderer/window.hpp"
 

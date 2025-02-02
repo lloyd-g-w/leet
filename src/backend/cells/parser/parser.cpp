@@ -1,6 +1,9 @@
-#include <iostream>
 #include <memory>
 #include <variant>
+
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 #include "../common.hpp"
 #include "../tokenizer/tokenizer.hpp"
@@ -22,6 +25,7 @@ struct ast_struct {
     str value;
     std::vector<ast_node> children;
 
+#ifdef DEBUG
     void print(const std_cells::str &prefix = "", bool is_tail = true) const {
         std::cout << prefix << (is_tail ? "└── " : "├── ") << value << " : "
                   << type_enum_to_string(type) << std::endl;
@@ -75,6 +79,7 @@ struct ast_struct {
             default: return "UNKNOWN";
         }
     }
+#endif
 };
 
 // BEGIN PROTOTYPES

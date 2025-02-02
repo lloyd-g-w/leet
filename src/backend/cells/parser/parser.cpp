@@ -62,14 +62,13 @@ static ast_node parse(q_ast &queue) {
                 const int closing_paren_index =
                     get_closing_paren_index(queue, i + 2);
 
-                // Pop the arguments into a sub queue, excluding the parentheses
-                q_ast sub_queue =
-                    pop_sub_queue(queue, i + 2, closing_paren_index - 1);
-
                 ast_node identifier = std::make_unique<ast_struct>();
                 identifier->type = ast_struct::type::FUNCTION;
                 identifier->value = token.value;
-                std::cout << "Function: " << token.value << std::endl;
+
+                // Pop the arguments into a sub queue, excluding the parentheses
+                q_ast sub_queue =
+                    pop_sub_queue(queue, i + 2, closing_paren_index - 1);
 
                 parse_arguments(identifier, sub_queue);
 

@@ -93,7 +93,6 @@ static tok tokenize_string(std::stringstream &ss) {
 
     char quote_type;
     ss >> quote_type;
-    tok_str += quote_type;
 
     while ((c = ss.peek()) != EOF) {
         if (c == quote_type) {
@@ -114,8 +113,9 @@ static tok tokenize_string(std::stringstream &ss) {
         throw std_cells::exception::invalid_syntax(
             "Expected closing quote for string");
 
-    tok_str += c;
+    // Consume the closing quote
     ss.ignore();
+    
 
     return tok{tok::type::STRING, tok_str};
 }

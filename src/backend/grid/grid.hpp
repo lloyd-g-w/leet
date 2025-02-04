@@ -20,7 +20,7 @@ class grid {
     void create_cell(pos pos);
     void set_cell(pos pos, cell cell);
     void delete_cell(pos pos);
-    void evaluate_cell(pos pos);
+    void compute_cell(pos pos);
 
     // Getters
     const cell &get_cell(pos pos);

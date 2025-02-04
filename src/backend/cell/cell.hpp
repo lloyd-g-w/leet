@@ -27,12 +27,16 @@ class cell {
     // Setters
     void set_raw(str value);
     void set_type(cell_type_t type);
+    void set_computed(const str value);
 
     // Getters
     const str &get_raw() const;
     str &get_raw_mut();
     const str &get_computed() const;
     const cell_type_t &get_type() const;
+
+    // Resetter
+    void clear_computed();
 
     // Bool methods
     bool is_empty() {
@@ -58,16 +62,11 @@ class cell {
     }
 
   private:
-    friend class cell_grid;
-
     // Members
     str m_raw_value;
     str m_computed_value;
     cell_type_t m_type = UNKNOWN;
     std::shared_ptr<void> m_user_data = nullptr;
-
-    // Main private methods
-    void set_computed(str value);
 };
 
 }  // namespace std_cells

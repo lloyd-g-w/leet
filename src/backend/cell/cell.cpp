@@ -13,6 +13,14 @@ void cell::set_type(cell_type_t type) {
     m_type = type;
 }
 
+void cell::set_computed(const str value) {
+    m_computed_value = value;
+}
+
+void cell::clear_computed() {
+    m_computed_value.clear();
+}
+
 // -------------------- GETTERS -------------------- //
 const str &cell::get_raw() const {
     return m_raw_value;

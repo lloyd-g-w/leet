@@ -1,92 +1,9 @@
-#include <memory>
-#include <variant>
-
-#ifdef DEBUG
+#include "parser.hpp"
 #include <iostream>
-#endif
-
-#include "../common.hpp"
-#include "../tokenizer/tokenizer.hpp"
 
 namespace std_cells {
 
-struct ast_struct;
-typedef std::unique_ptr<ast_struct> ast_node;
-
-struct ast_struct {
-    enum class type {
-        FUNCTION,
-        OPERATOR,
-        INT,
-        FLOAT,
-        STRING,
-        CELL_REFERENCE
-    } type;
-    str value;
-    std::vector<ast_node> children;
-
-#ifdef DEBUG
-    void print(const std_cells::str &prefix = "", bool is_tail = true) const {
-        std::cout << prefix << (is_tail ? "└── " : "├── ") << value << " : "
-                  << type_enum_to_string(type) << std::endl;
-
-        for (size_t i = 0; i < children.size(); i++) {
-            bool last_child = (i == children.size() - 1);
-            print_ast(children[i], prefix + (is_tail ? "    " : "│   "),
-                      last_child);
-        }
-    }
-
-    void print_sexpr() const {
-        std::cout << "(" << value;
-        for (const auto &child : children) {
-            std::cout << " ";
-            print_ast_sexpr(child);
-        }
-        std::cout << ")";
-    }
-
-  private:
-    void print_ast(const ast_node &node, const std_cells::str &prefix = "",
-                   bool is_tail = true) const {
-        std::cout << prefix << (is_tail ? "└── " : "├── ") << node->value
-                  << " : " << type_enum_to_string(node->type) << std::endl;
-
-        for (size_t i = 0; i < node->children.size(); i++) {
-            bool last_child = (i == node->children.size() - 1);
-            print_ast(node->children[i], prefix + (is_tail ? "    " : "│   "),
-                      last_child);
-        }
-    }
-
-    void print_ast_sexpr(const std_cells::ast_node &node) const {
-        std::cout << "(" << node->value;
-        for (const auto &child : node->children) {
-            std::cout << " ";
-            print_ast_sexpr(child);
-        }
-        std::cout << ")";
-    }
-
-    const str type_enum_to_string(enum type t) const {
-        switch (t) {
-            case type::FUNCTION: return "FN";
-            case type::OPERATOR: return "OP";
-            case type::INT: return "INT";
-            case type::FLOAT: return "FLT";
-            case type::STRING: return "STR";
-            case type::CELL_REFERENCE: return "REF";
-            default: return "UNKNOWN";
-        }
-    }
-#endif
-};
-
 // BEGIN PROTOTYPES
-typedef std::deque<std::variant<tok, ast_node>> q_ast;
-
-ast_node parse_tokens(q_tok &tokens);
-
 static ast_node parse(q_ast &queue);
 static void parse_arguments(ast_node &parent, q_ast &queue);
 static ast_node parse_generic(std::variant<tok, ast_node> &item);
@@ -97,8 +14,8 @@ static q_ast pop_sub_queue(q_ast &queue, const size_t starting_index,
                            const size_t closing_index);
 static size_t get_closing_paren_index(const q_ast &queue,
                                       const size_t starting_index);
-
 // END PROTOTYPES
+
 ast_node parse_tokens(q_tok &tokens) {
     q_ast queue = construct_ast_queue(tokens);
     return parse(queue);
@@ -156,6 +73,38 @@ static ast_node parse(q_ast &queue) {
         }
     }
 
+    // Unary operators
+    // TODO: Refactor this
+    for (size_t i = 0; i < queue.size(); i++) {
+        if (std::holds_alternative<tok>(queue.at(i))) {
+            auto &token = std::get<tok>(queue.at(i));
+            if (token.value == "+" || token.value == "-") {
+                if (i == 0) {
+                    ast_node unary = std::make_unique<ast_struct>();
+                    unary->type = ast_struct::type::OPERATOR;
+                    unary->value = token.value == "+" ? "POS" : "NEG";
+
+                    unary->children.push_back(parse_number(queue.at(i + 1)));
+                    queue.erase(queue.begin() + i, queue.begin() + i + 2);
+                    queue.insert(queue.begin() + i, std::move(unary));
+                } else if (std::holds_alternative<tok>(queue.at(i - 1))) {
+                    auto &prev = std::get<tok>(queue.at(i - 1));
+                    if (prev.type != tok::type::INT &&
+                        prev.type != tok::type::FLOAT) {
+                        ast_node unary = std::make_unique<ast_struct>();
+                        unary->type = ast_struct::type::OPERATOR;
+                        unary->value = token.value == "+" ? "POS" : "NEG";
+
+                        unary->children.push_back(
+                            parse_number(queue.at(i + 1)));
+                        queue.erase(queue.begin() + i, queue.begin() + i + 2);
+                        queue.insert(queue.begin() + i, std::move(unary));
+                    }
+                }
+            }
+        }
+    }
+
     // Exponents
     for (size_t i = 0; i < queue.size(); i++) {
         if (std::holds_alternative<tok>(queue.at(i))) {
@@ -163,7 +112,7 @@ static ast_node parse(q_ast &queue) {
             if (token.value == "^") {
                 ast_node exponent = std::make_unique<ast_struct>();
                 exponent->type = ast_struct::type::OPERATOR;
-                exponent->value = "EXP";
+                exponent->value = "POW";
                 exponent->children.push_back(parse_number(queue.at(i - 1)));
                 exponent->children.push_back(parse_number(queue.at(i + 1)));
 
@@ -215,27 +164,44 @@ static ast_node parse(q_ast &queue) {
     if (queue.size() != 1)
         throw exception::cell_exception("Invalid expression - too many tokens");
 
+    // If the last token is a number or string just return it
+    if (std::holds_alternative<tok>(queue.front()))
+        return parse_generic(queue.front());
+
     return std::move(std::get<ast_node>(queue.front()));
 }
 
 static void parse_arguments(ast_node &parent, q_ast &queue) {
     // Parse the first n-1 arguments
-    for (size_t i = 0; i < queue.size(); i++) {
-        if (std::holds_alternative<tok>(queue.at(i))) {
-            auto &token = std::get<tok>(queue.at(i));
-            if (token.value == ",") {
-                if (i == 1) {
-                    parent->children.push_back(parse_generic(queue.at(i - 1)));
-                    // Erase the comma and the argument
-                    queue.erase(queue.begin(), queue.begin() + i + 1);
-                } else {
-                    q_ast sub_queue = pop_sub_queue(queue, 0, i - 1);
-                    parent->children.push_back(parse(sub_queue));
-                    // Erase the comma
-                    queue.erase(queue.begin());
-                }
-                i = 0;
+    int inner_func_end = -1;
+    for (int i = 0; i < queue.size(); i++) {
+        if (!std::holds_alternative<tok>(queue.at(i))) {
+            continue;
+        }
+
+        auto &token = std::get<tok>(queue.at(i));
+
+        if (i > inner_func_end && token.type == tok::type::FUNCTION) {
+            inner_func_end = get_closing_paren_index(queue, i + 2);
+        }
+
+        if (i > inner_func_end && token.value == ",") {
+            if (i == 1) {
+                parent->children.push_back(parse_generic(queue.at(i - 1)));
+
+                // Erase the comma and the argument
+                queue.erase(queue.begin(), queue.begin() + i + 1);
+            } else {
+                q_ast sub_queue = pop_sub_queue(queue, 0, i - 1);
+
+                // Print the sub queue
+                parent->children.push_back(parse(sub_queue));
+                // Erase the comma
+                queue.erase(queue.begin());
             }
+
+            i = -1;
+            inner_func_end = -1;
         }
     }
 
@@ -303,7 +269,7 @@ static q_ast construct_ast_queue(q_tok &tokens) {
     return ast_queue;
 }
 
-// Pop a sub queue [starting_index, final_index]
+// Pop the closed sub queue [starting_index, final_index]
 static q_ast pop_sub_queue(q_ast &queue, const size_t starting_index,
                            const size_t final_index) {
     q_ast sub_queue;
@@ -324,10 +290,11 @@ static size_t get_closing_paren_index(const q_ast &queue,
     for (size_t i = starting_index; i < queue.size(); i++) {
         if (std::holds_alternative<tok>(queue.at(i))) {
             auto &token = std::get<tok>(queue.at(i));
-            if (token.value == "(")
+            if (token.value == "(") {
                 count++;
-            else if (token.value == ")")
+            } else if (token.value == ")") {
                 count--;
+            }
         }
         if (count == 0)
             return i;

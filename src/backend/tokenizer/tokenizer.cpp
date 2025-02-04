@@ -24,14 +24,17 @@ q_tok tokenize(str string) {
         throw std_cells::exception::invalid_syntax(
             "Expected expression to start with '='");
 
-    while ((c = ss.peek()) != EOF) {
+    while ((c = ss.peek()) != EOF && c != '\0') {
         if (isspace(c)) {
             ss.ignore();
             continue;
         }
 
-        if (isparen(c) || isoperator(c) || c == ',' || c == ':') {
+        if (isparen(c) || c == ',' || c == ':') {
             tokens.push_back({tok::type::PUNCTUATION, str(1, c)});
+            ss.ignore();
+        } else if (isoperator(c)) {
+            tokens.push_back({tok::type::OPERATOR, str(1, c)});
             ss.ignore();
         } else if (isquote(c)) {
             tokens.push_back(tokenize_string(ss));
@@ -115,7 +118,6 @@ static tok tokenize_string(std::stringstream &ss) {
 
     // Consume the closing quote
     ss.ignore();
-    
 
     return tok{tok::type::STRING, tok_str};
 }

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "../../wrappers/imgui_wrappers.hpp"
 #include "grid.hpp"
 #include "imgui.h"
@@ -91,7 +93,7 @@ void grid::draw_cell(pos cell_pos) {
                 if (buffer.c_str()[0] == '\0') {
                     m_cell_grid.delete_cell(cell_pos);
                 } else {
-                    // Parse cell?
+                    m_cell_grid.compute_cell(cell_pos);
                     gui_data->is_editing = false;
                     gui_data->is_focused = false;
                 }
@@ -110,8 +112,17 @@ void grid::draw_cell(pos cell_pos) {
         ImVec2 button_center = ImVec2((button_min.x + button_max.x) * 0.5f,
                                       (button_min.y + button_max.y) * 0.5f);
 
-        str overlay =
-            is_set ? m_cell_grid.get_cell_mut(cell_pos).get_raw() : "";
+        str overlay = "";
+
+        if (is_set) {
+            auto &cell = m_cell_grid.get_cell_mut(cell_pos);
+
+            if (cell.is_computed()) {
+                overlay = cell.get_computed();
+            } else {
+                overlay = cell.get_raw();
+            }
+        }
 
         if (overlay != "") {
             float padding = scale(ImGui::GetStyle().FramePadding.x);
@@ -144,11 +155,9 @@ void grid::draw_cell(pos cell_pos) {
             ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
             gui_data->is_editing = true;
             if (!is_set) {
-                if (!is_set) {
-                    m_cell_grid.create_cell(cell_pos);
-                    m_cell_grid.get_cell_mut(cell_pos)
-                        .set_user_data<cell_props_t>(*gui_data);
-                }
+                m_cell_grid.create_cell(cell_pos);
+                m_cell_grid.get_cell_mut(cell_pos).set_user_data<cell_props_t>(
+                    *gui_data);
             }
         }
     }

@@ -6,6 +6,9 @@
 
 namespace std_cells {
 
+class cell;
+class grid;
+
 // Commonly used types
 typedef std::string str;
 typedef std::vector<str> v_str;

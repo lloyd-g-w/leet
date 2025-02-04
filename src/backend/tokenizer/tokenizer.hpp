@@ -8,6 +8,7 @@ namespace std_cells {
 
 struct tok {
     enum class type {
+        NONE,
         PUNCTUATION,
         OPERATOR,
         INT,

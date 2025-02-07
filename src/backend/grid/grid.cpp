@@ -36,11 +36,12 @@ void grid::evaluate_cell(pos pos) {
     }
 
     auto &cell = get_cell_mut(pos);
+    evaluate_cell(cell);
+}
 
+void grid::evaluate_cell(cell &cell) {
     try {
         const str raw = cell.get_raw();
-        std::cout << "Evaluating cell " << pos_to_str(pos) << ": " << raw
-                  << std::endl;
         auto tokens = tokenize(raw);
         auto ast = parse_tokens(tokens);
 
@@ -55,12 +56,26 @@ void grid::evaluate_cell(pos pos) {
         }
 
     } catch (exception::cell_exception &e) {
-        if (cell.is_computed()) {
+        if (cell.is_evaluated()) {
             cell.clear_evaluated();
         }
-        std::cerr << "Error computing cell " << pos_to_str(pos) << ": "
-                  << e.what() << std::endl;
+        std::cerr << "Error during cell evaluation: " << e.what() << std::endl;
     }
+}
+
+void grid::set_cell_raw(pos pos, const str &raw) {
+    if (!valid_pos(pos)) {
+        throw exception::pos_out_of_range();
+    }
+    if (!is_set(pos)) {
+        throw exception::cell_not_set();
+    }
+    auto &cell = m_cells[pos];
+    if (cell.get_raw() == raw) {
+        return;
+    }
+    cell.set_raw(raw);
+    evaluate_cell(cell);
 }
 
 // ----------------------------- GETTERS -------------------- //
@@ -81,6 +96,18 @@ const int grid::get_rows() {
 
 const int grid::get_cols() {
     return m_cols;
+}
+
+// ==================== VERIFICATION ==================== //
+
+const bool grid::has_user_data(pos pos) {
+    if (!valid_pos(pos)) {
+        throw exception::pos_out_of_range();
+    }
+    if (!is_set(pos)) {
+        throw exception::cell_not_set();
+    }
+    return m_cells[pos].has_user_data();
 }
 
 // -------------------- PRIVATE METHODS -------------------- //

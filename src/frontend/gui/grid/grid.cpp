@@ -1,5 +1,4 @@
 #include "grid.hpp"
-#include <iostream>
 
 #include "imgui.h"
 #include "imgui_impl_glfw.h"

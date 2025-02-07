@@ -44,6 +44,10 @@ str grid::num_to_alpha(int num) {
     return res;
 }
 
+const bool grid::is_set(pos pos) {
+    return m_cells.contains(pos);
+}
+
 // -------------------- PRIVATE METHODS -------------------- //
 
 bool grid::valid_pos(pos pos) {
@@ -51,8 +55,4 @@ bool grid::valid_pos(pos pos) {
         return false;
     }
     return true;
-}
-
-bool grid::is_set(pos pos) {
-    return m_cells.contains(pos);
 }

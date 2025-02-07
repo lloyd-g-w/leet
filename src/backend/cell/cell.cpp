@@ -16,7 +16,7 @@ void cell::set_float_eval(const double value) {
 }
 
 void cell::set_type(const cell::type type) {
-    m_data.type = type;
+    m_data.eval_type = type;
 }
 
 void cell::append_dep(const pos &dep) {
@@ -41,7 +41,7 @@ const double &cell::get_float_eval() const {
 }
 
 const cell::type &cell::get_type() const {
-    return m_data.type;
+    return m_data.eval_type;
 }
 
 const std::vector<pos> &cell::get_deps() const {
@@ -87,7 +87,7 @@ bool cell::is_dep(const pos &dep) {
     return false;
 }
 
-bool cell::is_computed() {
+bool cell::is_evaluated() {
     return !m_data.eval_str.empty() && m_data.eval_float != INFINITY;
 }
 
@@ -96,14 +96,4 @@ bool cell::has_user_data() {
     return m_user_data != nullptr;
 }
 
-template <typename T> void cell::set_user_data(const T &data) {
-    m_user_data = std::make_shared<T>(data);
-}
 
-template <typename T> const T &cell::get_user_data() {
-    return *std::static_pointer_cast<T>(m_user_data);
-}
-
-template <typename T> T &cell::get_user_data_mut() {
-    return *std::static_pointer_cast<T>(m_user_data);
-}

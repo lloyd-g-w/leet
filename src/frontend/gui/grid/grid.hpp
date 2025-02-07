@@ -15,6 +15,7 @@ struct cell_props_t {
     // Variables
     bool is_editing = false;
     bool is_focused = false;
+    str buffer;
 };
 
 struct label_props_t {

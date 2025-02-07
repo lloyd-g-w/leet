@@ -28,8 +28,6 @@ class cell {
         type eval_type = type::NOT_SET;
     };
 
-    cell() = default;
-
     // Members
     data m_data{};
     std::vector<pos> m_deps;
@@ -59,13 +57,16 @@ class cell {
     // Verification
     bool is_empty();
     bool is_dep(const pos &dep);
-    bool is_computed();
+    bool is_evaluated();
 
     // User data methods
     bool has_user_data();
-    template <typename T> void set_user_data(const T &data);
-    template <typename T> const T &get_user_data();
-    template <typename T> T &get_user_data_mut();
+    template <typename T> void set_user_data(const T &data) {
+        m_user_data = std::make_shared<T>(data);
+    }
+    template <typename T> const T &get_user_data() {
+        return *std::static_pointer_cast<T>(m_user_data);
+    }
 };
 
 }  // namespace std_cells

@@ -1,4 +1,5 @@
-#include <iostream>
+
+#include <sstream>
 
 #include "../../wrappers/imgui_wrappers.hpp"
 #include "grid.hpp"
@@ -60,13 +61,11 @@ void grid::draw_cell(pos cell_pos) {
     float cell_height = scale(m_row_labels.at(cell_pos.row)->dimensions.height);
 
     // Get gui data for the cell if it exists
-    cell_props_t *gui_data;
+    cell_props_t gui_data;
     if (is_set) {
-        std_cells::cell *cell = &m_cell_grid.get_cell_mut(cell_pos);
-        if (cell->has_user_data())
-            gui_data = &cell->get_user_data_mut<cell_props_t>();
+        gui_data = m_cell_grid.get_cell_user_data<cell_props_t>(cell_pos);
     } else {
-        gui_data = new cell_props_t();
+        gui_data = cell_props_t();
     }
 
     str cell_label = "##" + std::to_string(cell_pos.row) + "-" +
@@ -76,8 +75,8 @@ void grid::draw_cell(pos cell_pos) {
     ImVec2 rect_max = ImVec2(rect_min.x + cell_width, rect_min.y + cell_height);
 
     // Draw the cell
-    if (gui_data->is_editing) {
-        str &buffer = m_cell_grid.get_cell_mut(cell_pos).get_raw_mut();
+    if (gui_data.is_editing) {
+        str &buffer = gui_data.buffer;
 
         // This ensures there is a white backgroud
         // even when the textbox isnt the correct height
@@ -86,21 +85,22 @@ void grid::draw_cell(pos cell_pos) {
                                      ImVec2(cell_width, cell_height));
         pop_cell_style();
 
-        if (gui_data->is_focused) {
+        if (gui_data.is_focused) {
             // This check is required as setting focus
             // does not activate item in the same frame
             if (ImGui::IsItemDeactivated()) {
                 if (buffer.c_str()[0] == '\0') {
                     m_cell_grid.delete_cell(cell_pos);
+                    is_set = false;
                 } else {
-                    m_cell_grid.compute_cell(cell_pos);
-                    gui_data->is_editing = false;
-                    gui_data->is_focused = false;
+                    m_cell_grid.set_cell_raw(cell_pos, buffer);
+                    gui_data.is_editing = false;
+                    gui_data.is_focused = false;
                 }
             }
         } else {
             ImGui::SetKeyboardFocusHere(-1);
-            gui_data->is_focused = true;
+            gui_data.is_focused = true;
         }
     } else {
         push_cell_style();
@@ -115,12 +115,18 @@ void grid::draw_cell(pos cell_pos) {
         str overlay = "";
 
         if (is_set) {
-            auto &cell = m_cell_grid.get_cell_mut(cell_pos);
+            auto &cell_data = m_cell_grid.get_cell_data(cell_pos);
 
-            if (cell.is_computed()) {
-                overlay = cell.get_computed();
+            if (cell_data.eval_type != std_cells::cell::type::NOT_SET) {
+                std::stringstream ss;
+                if (cell_data.eval_type == std_cells::cell::type::STRING) {
+                    ss << cell_data.eval_str;
+                } else {
+                    ss << cell_data.eval_float;
+                }
+                overlay = ss.str();
             } else {
-                overlay = cell.get_raw();
+                overlay = cell_data.raw;
             }
         }
 
@@ -153,11 +159,11 @@ void grid::draw_cell(pos cell_pos) {
         // Make raw value visible if double clicked
         if (ImGui::IsItemHovered() &&
             ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-            gui_data->is_editing = true;
+            gui_data.is_editing = true;
             if (!is_set) {
                 m_cell_grid.create_cell(cell_pos);
-                m_cell_grid.get_cell_mut(cell_pos).set_user_data<cell_props_t>(
-                    *gui_data);
+                m_cell_grid.set_cell_user_data<cell_props_t>(cell_pos,
+                                                             gui_data);
             }
         }
     }
@@ -177,8 +183,8 @@ void grid::draw_cell(pos cell_pos) {
         m_active_cell = cell_pos;
     }
 
-    if (!is_set) {
-        delete gui_data;
+    if (is_set) {
+        m_cell_grid.set_cell_user_data<cell_props_t>(cell_pos, gui_data);
     }
 }
 
@@ -209,12 +215,7 @@ float grid::next_populated_dist(pos pos, float max_dist) {
 }
 
 bool grid::is_cell_set(pos pos) {
-    try {
-        m_cell_grid.get_cell(pos);
-        return true;
-    } catch (std_cells::exception::cell_exception e) {
-        return false;
-    }
+    return m_cell_grid.is_set(pos);
 }
 
 void grid::set_column_width(int col, float width) {

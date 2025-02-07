@@ -53,6 +53,7 @@ const std::vector<pos> &cell::get_deps() const {
 void cell::clear_evaluated() {
     m_data.eval_str.clear();
     m_data.eval_float = INFINITY;
+    m_data.eval_type = type::NOT_SET;
 }
 
 void cell::remove_dep(const pos &dep) {
@@ -88,12 +89,10 @@ bool cell::is_dep(const pos &dep) {
 }
 
 bool cell::is_evaluated() {
-    return !m_data.eval_str.empty() && m_data.eval_float != INFINITY;
+    return m_data.eval_type != type::NOT_SET;
 }
 
 // ==================== USER DATA ==================== //
 bool cell::has_user_data() {
     return m_user_data != nullptr;
 }
-
-

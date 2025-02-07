@@ -115,7 +115,7 @@ void grid::handle_scrolling() {
 void grid::handle_resize(axis_t axis, int index, label_props_t *label_data) {
     ImVec2 button_min = ImGui::GetItemRectMin();
     ImVec2 button_max = ImGui::GetItemRectMax();
-    float tolerance = scale(3.0f);
+    float tolerance = scale(6.0f);
 
     switch (axis) {
         case ROW: {

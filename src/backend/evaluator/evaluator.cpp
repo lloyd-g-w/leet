@@ -27,6 +27,23 @@ eval_res evaluate(const ast_node &ast, std::optional<grid> g) {
             return {cell::type::DECIMAL, std::stod(ast->value)};
         case ast_struct::type::STRING:
             return {cell::type::STRING, INFINITY, ast->value};
+        case ast_struct::type::CELL_REFERENCE: {
+            if (!g.has_value())
+                throw exception::cell_exception(
+                    "ERROR: Grid is required to evaluate cell references");
+
+            auto cell_data = g->get_cell_data(ast->value);
+            auto type = cell_data.eval_type;
+
+            if (type == cell::type::NOT_SET)
+                return {cell::type::STRING, INFINITY, cell_data.raw};
+
+            else if (type == cell::type::STRING)
+                return {cell::type::STRING, INFINITY, cell_data.eval_str};
+
+            else
+                return {type, cell_data.eval_float};
+        }
 
         case ast_struct::type::FUNCTION: {
             return evaluate_function(ast, g);
@@ -55,7 +72,7 @@ static eval_res evaluate_function(const ast_node &ast,
 
         std::vector<double> nums;
         for (const auto &child : ast->children) {
-            auto res = evaluate(child);
+            auto res = evaluate(child, g);
 
             if (!is_num(res))
                 throw exception::cell_exception(
@@ -79,7 +96,7 @@ static eval_res evaluate_function(const ast_node &ast,
 
         std::vector<double> nums;
         for (const auto &child : ast->children) {
-            auto res = evaluate(child);
+            auto res = evaluate(child, g);
 
             if (!is_num(res))
                 throw exception::cell_exception(
@@ -101,7 +118,7 @@ static eval_res evaluate_function(const ast_node &ast,
             throw exception::cell_exception(
                 "SQRT function requires 1 argument");
 
-        auto child = evaluate(ast->children[0]);
+        auto child = evaluate(ast->children[0], g);
 
         if (!is_num(child))
             throw exception::cell_exception(
@@ -125,7 +142,7 @@ static eval_res evaluate_operator(const ast_node &ast,
     if (ast->value == "POS") {
         if (ast->children.size() != 1)
             throw exception::cell_exception("POS operator requires 1 argument");
-        auto res = evaluate(ast->children[0]);
+        auto res = evaluate(ast->children[0], g);
 
         if (!is_num(res))
             throw exception::cell_exception(
@@ -138,7 +155,7 @@ static eval_res evaluate_operator(const ast_node &ast,
         if (ast->children.size() != 1)
             throw exception::cell_exception("NEG operator requires 1 argument");
 
-        auto child = evaluate(ast->children[0]);
+        auto child = evaluate(ast->children[0], g);
         if (!is_num(child))
             throw exception::cell_exception(
                 "NEG operator requires a number argument");
@@ -152,8 +169,10 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "ADD operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0]);
-        auto right = evaluate(ast->children[1]);
+        std::cout << "Evaluating ADD operator" << std::endl;
+        std::cout << "Left: " << ast->children[0]->value << std::endl;
+        auto left = evaluate(ast->children[0], g);
+        auto right = evaluate(ast->children[1], g);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -168,8 +187,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "SUB operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0]);
-        auto right = evaluate(ast->children[1]);
+        auto left = evaluate(ast->children[0], g);
+        auto right = evaluate(ast->children[1], g);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -184,8 +203,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "MUL operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0]);
-        auto right = evaluate(ast->children[1]);
+        auto left = evaluate(ast->children[0], g);
+        auto right = evaluate(ast->children[1], g);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -200,8 +219,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "DIV operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0]);
-        auto right = evaluate(ast->children[1]);
+        auto left = evaluate(ast->children[0], g);
+        auto right = evaluate(ast->children[1], g);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -216,8 +235,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "POW operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0]);
-        auto right = evaluate(ast->children[1]);
+        auto left = evaluate(ast->children[0], g);
+        auto right = evaluate(ast->children[1], g);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(

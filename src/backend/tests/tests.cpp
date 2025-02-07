@@ -3,7 +3,7 @@
 #include <iostream>
 #include <string>
 
-#include "../evaluator/evaluator.cpp"
+/*#include "../evaluator/evaluator.cpp"*/
 #include "../maths/maths.cpp"
 #include "../parser/parser.cpp"
 #include "../tokenizer/tokenizer.cpp"
@@ -47,16 +47,16 @@ int main(int argc, char *argv[]) {
     ast->print_sexpr();
     cout << endl;
 
-    auto eval = std_cells::evaluate(ast);
-
-    cout << endl;
-    cout << "EVALUATION RESULT:" << endl;
-    if (eval.type == std_cells::cell::type::INT ||
-        eval.type == std_cells::cell::type::DECIMAL) {
-        cout << eval.number << endl;
-    } else {
-        cout << eval.string << endl;
-    }
-    cout << endl;
+    /*auto eval = std_cells::evaluate(ast);*/
+    /**/
+    /*cout << endl;*/
+    /*cout << "EVALUATION RESULT:" << endl;*/
+    /*if (eval.type == std_cells::cell::type::INT ||*/
+    /*    eval.type == std_cells::cell::type::DECIMAL) {*/
+    /*    cout << eval.number << endl;*/
+    /*} else {*/
+    /*    cout << eval.string << endl;*/
+    /*}*/
+    /*cout << endl;*/
     return EXIT_SUCCESS;
 }

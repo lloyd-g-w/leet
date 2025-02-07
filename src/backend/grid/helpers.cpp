@@ -25,12 +25,12 @@ pos grid::str_to_pos(str pos_str) {
         letter_num *= 26;
         letter_num += (c - 'A');
     }
-    return pos(letter_num, std::stoi(numbers) - 1);
+    return pos(std::stoi(numbers) - 1, letter_num);
 }
 
 // Converts a position to a string like "AB23"
 str grid::pos_to_str(pos pos) {
-    return num_to_alpha(pos.row + 1) + std::to_string(pos.col + 1);
+    return num_to_alpha(pos.col + 1) + std::to_string(pos.row + 1);
 }
 
 // Converts a number to an Excel-like column name

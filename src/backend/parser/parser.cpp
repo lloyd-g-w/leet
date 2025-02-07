@@ -1,5 +1,4 @@
 #include "parser.hpp"
-#include <iostream>
 
 namespace std_cells {
 
@@ -23,6 +22,19 @@ ast_node parse_tokens(q_tok &tokens) {
 
 static ast_node parse(q_ast &queue) {
     // Cell references
+    for (size_t i = 0; i < queue.size(); i++) {
+        if (std::holds_alternative<tok>(queue.at(i))) {
+            auto &token = std::get<tok>(queue.at(i));
+            if (token.type == tok::type::CELL_REFERENCE) {
+                ast_node cell_ref = std::make_unique<ast_struct>();
+                cell_ref->type = ast_struct::type::CELL_REFERENCE;
+                cell_ref->value = token.value;
+
+                queue.erase(queue.begin() + i);
+                queue.insert(queue.begin() + i, std::move(cell_ref));
+            }
+        }
+    }
 
     // Cell ranges
 

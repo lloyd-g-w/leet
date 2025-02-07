@@ -80,6 +80,10 @@ void grid::set_cell_raw(pos pos, const str &raw) {
 
 // ----------------------------- GETTERS -------------------- //
 
+const cell::data &grid::get_cell_data(str pos_str) {
+    return get_cell_data(str_to_pos(pos_str));
+}
+
 const cell::data &grid::get_cell_data(pos pos) {
     if (!valid_pos(pos)) {
         throw exception::pos_out_of_range();

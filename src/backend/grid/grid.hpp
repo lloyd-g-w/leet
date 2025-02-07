@@ -33,6 +33,7 @@ class grid {
     }
 
     // Getters
+    const cell::data &get_cell_data(str pos_str);
     const cell::data &get_cell_data(pos pos);
     template <typename T> const T &get_cell_user_data(pos pos) {
         if (!valid_pos(pos)) {

@@ -73,7 +73,7 @@ static tok tokenize_number(std::stringstream &ss) {
     while ((c = ss.peek()) != EOF) {
         if (isdigit(c) || c == '.') {
             if (c == '.') {
-                type = tok::type::FLOAT;
+                type = tok::type::DECIMAL;
                 dot_count++;
             }
 

@@ -32,7 +32,7 @@ struct ast_struct {
         FUNCTION,
         OPERATOR,
         INT,
-        FLOAT,
+        DECIMAL,
         STRING,
         CELL_REFERENCE
     } type;
@@ -87,7 +87,7 @@ struct ast_struct {
             case type::FUNCTION: return "FN";
             case type::OPERATOR: return "OP";
             case type::INT: return "INT";
-            case type::FLOAT: return "FLT";
+            case type::DECIMAL: return "DEC";
             case type::STRING: return "STR";
             case type::CELL_REFERENCE: return "REF";
             default: return "UNKNOWN";

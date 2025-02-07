@@ -1,72 +1,71 @@
 #pragma once
 
+#include <cmath>
 #include <memory>
 
 #include "../common.hpp"
 
 namespace std_cells {
 
-// Custom types and enums
-
-enum cell_type_t {
-    UNKNOWN,
-    STRING,
-    NUMBER,
-    FLOAT,
-    OPERATOR,
-    FUNCTION,
-    CELL_REFERENCE
-};
-
 // Main class
 class cell {
   public:
-    cell(str value = "") : m_raw_value(value) {}
+    enum class type {
+        NOT_SET,
+        INT,
+        DECIMAL,
+        STRING,
+        DATE,
+    };
+
+  private:
+    friend class grid;
+
+    struct data {
+        str raw;
+        str eval_str;
+        double eval_float = INFINITY;
+        type eval_type = type::NOT_SET;
+    };
+
+    cell() = default;
+
+    // Members
+    data m_data{};
+    std::vector<pos> m_deps;
+    std::shared_ptr<void> m_user_data = nullptr;
 
     // Public methods
     // Setters
-    void set_raw(str value);
-    void set_type(cell_type_t type);
-    void set_computed(const str value);
+    void set_raw(const str value);
+    void set_str_eval(const str value);
+    void set_float_eval(const double value);
+    void set_type(const type type);
+    void append_dep(const pos &dep);
+    void set_deps(const std::vector<pos> &deps);
 
     // Getters
     const str &get_raw() const;
-    str &get_raw_mut();
-    const str &get_computed() const;
-    const cell_type_t &get_type() const;
+    const str &get_str_eval() const;
+    const double &get_float_eval() const;
+    const type &get_type() const;
+    const std::vector<pos> &get_deps() const;
 
-    // Resetter
-    void clear_computed();
+    // Clearing
+    void clear_evaluated();
+    void remove_dep(const pos &dep);
+    void clear_deps();
 
-    // Bool methods
-    bool is_empty() {
-        return m_raw_value.empty();
-    }
-
-    bool is_computed() {
-        return !m_computed_value.empty();
-    }
+    // Verification
+    bool is_empty();
+    bool is_dep(const pos &dep);
+    bool is_computed();
 
     // User data methods
-    bool has_user_data() {
-        return m_user_data != nullptr;
-    }
-    template <typename T> void set_user_data(const T &data) {
-        m_user_data = std::make_shared<T>(data);
-    }
-    template <typename T> const T &get_user_data() {
-        return *std::static_pointer_cast<T>(m_user_data);
-    }
-    template <typename T> T &get_user_data_mut() {
-        return *std::static_pointer_cast<T>(m_user_data);
-    }
-
-  private:
-    // Members
-    str m_raw_value;
-    str m_computed_value;
-    cell_type_t m_type = UNKNOWN;
-    std::shared_ptr<void> m_user_data = nullptr;
+    bool has_user_data();
+    template <typename T> void set_user_data(const T &data);
+    template <typename T> const T &get_user_data();
+    template <typename T> T &get_user_data_mut();
 };
 
 }  // namespace std_cells

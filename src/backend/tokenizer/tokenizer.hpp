@@ -12,7 +12,7 @@ struct tok {
         PUNCTUATION,
         OPERATOR,
         INT,
-        FLOAT,
+        DECIMAL,
         STRING,
         FUNCTION,
         CELL_REFERENCE

@@ -90,7 +90,7 @@ static ast_node parse(q_ast &queue) {
                 } else if (std::holds_alternative<tok>(queue.at(i - 1))) {
                     auto &prev = std::get<tok>(queue.at(i - 1));
                     if (prev.type != tok::type::INT &&
-                        prev.type != tok::type::FLOAT) {
+                        prev.type != tok::type::DECIMAL) {
                         ast_node unary = std::make_unique<ast_struct>();
                         unary->type = ast_struct::type::OPERATOR;
                         unary->value = token.value == "+" ? "POS" : "NEG";
@@ -223,8 +223,8 @@ static ast_node parse_generic(std::variant<tok, ast_node> &item) {
     ast_node generic = std::make_unique<ast_struct>();
     if (token.type == tok::type::INT)
         generic->type = ast_struct::type::INT;
-    else if (token.type == tok::type::FLOAT)
-        generic->type = ast_struct::type::FLOAT;
+    else if (token.type == tok::type::DECIMAL)
+        generic->type = ast_struct::type::DECIMAL;
     else if (token.type == tok::type::STRING)
         generic->type = ast_struct::type::STRING;
     else if (token.type == tok::type::CELL_REFERENCE)
@@ -246,8 +246,8 @@ static ast_node parse_number(std::variant<tok, ast_node> &item) {
     ast_node number = std::make_unique<ast_struct>();
     if (token.type == tok::type::INT)
         number->type = ast_struct::type::INT;
-    else if (token.type == tok::type::FLOAT)
-        number->type = ast_struct::type::FLOAT;
+    else if (token.type == tok::type::DECIMAL)
+        number->type = ast_struct::type::DECIMAL;
     else if (token.type == tok::type::CELL_REFERENCE)
         number->type = ast_struct::type::CELL_REFERENCE;
     else

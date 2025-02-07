@@ -5,6 +5,7 @@ using namespace std_cells;
 // -------------------- PUBLIC METHODS -------------------- //
 
 // Converts a string like "AB23" to a position
+// Noting that pos {0, 0} is "A1"
 pos grid::str_to_pos(str pos_str) {
     str letters;
     str numbers;
@@ -24,7 +25,7 @@ pos grid::str_to_pos(str pos_str) {
         letter_num *= 26;
         letter_num += (c - 'A');
     }
-    return pos(letter_num, numbers.empty() ? 0 : std::stoi(numbers));
+    return pos(letter_num, std::stoi(numbers) - 1);
 }
 
 // Converts a position to a string like "AB23"

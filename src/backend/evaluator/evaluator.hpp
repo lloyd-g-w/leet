@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include "../common.hpp"
 #include "../grid/grid.hpp"
 #include "../parser/parser.hpp"
@@ -13,5 +11,5 @@ struct eval_res {
     str string;
 };
 
-eval_res evaluate(const ast_node &ast, std::optional<grid> g = std::nullopt);
+eval_res evaluate(const ast_node &ast, grid &g, pos caller_cell_pos);
 }  // namespace std_cells

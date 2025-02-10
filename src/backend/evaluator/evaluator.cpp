@@ -10,15 +10,17 @@
 namespace std_cells {
 // Prototype
 
-static eval_res evaluate_function(const ast_node &ast, std::optional<grid> g);
-static eval_res evaluate_operator(const ast_node &ast, std::optional<grid> g);
+static eval_res evaluate_function(const ast_node &ast, grid &g,
+                                  pos caller_cell_pos);
+static eval_res evaluate_operator(const ast_node &ast, grid &g,
+                                  pos caller_cell_pos);
 static str to_str(const double &value);
 static bool is_whole_num(const double &number);
 static bool is_num(const eval_res &res);
 
 // End prototype
 
-eval_res evaluate(const ast_node &ast, std::optional<grid> g) {
+eval_res evaluate(const ast_node &ast, grid &g, pos caller_cell_pos) {
     switch (ast->type) {
         // LITERALS
         case ast_struct::type::INT:
@@ -28,12 +30,20 @@ eval_res evaluate(const ast_node &ast, std::optional<grid> g) {
         case ast_struct::type::STRING:
             return {cell::type::STRING, INFINITY, ast->value};
         case ast_struct::type::CELL_REFERENCE: {
-            if (!g.has_value())
-                throw exception::cell_exception(
-                    "ERROR: Grid is required to evaluate cell references");
-
-            auto cell_data = g->get_cell_data(ast->value);
+            auto cell_data = g.get_cell_data(ast->value);
             auto type = cell_data.eval_type;
+
+            pos parent_pos = grid::str_to_pos(ast->value);
+
+            if (parent_pos == caller_cell_pos)
+                throw exception::cell_exception(
+                    "ERROR: self-referencing is not allowed");
+
+            std::cout << "Adding dependency to " << parent_pos.row << " "
+                      << parent_pos.col << " of " << caller_cell_pos.row << " "
+                      << caller_cell_pos.col << std::endl;
+
+            g.add_dependency(parent_pos, caller_cell_pos);
 
             if (type == cell::type::NOT_SET)
                 return {cell::type::STRING, INFINITY, cell_data.raw};
@@ -46,11 +56,11 @@ eval_res evaluate(const ast_node &ast, std::optional<grid> g) {
         }
 
         case ast_struct::type::FUNCTION: {
-            return evaluate_function(ast, g);
+            return evaluate_function(ast, g, caller_cell_pos);
         }
 
         case ast_struct::type::OPERATOR: {
-            return evaluate_operator(ast, g);
+            return evaluate_operator(ast, g, caller_cell_pos);
         }
 
         default: break;
@@ -59,8 +69,8 @@ eval_res evaluate(const ast_node &ast, std::optional<grid> g) {
     throw exception::cell_exception("ERROR: Could not evaluate AST node");
 }
 
-static eval_res evaluate_function(const ast_node &ast,
-                                  std::optional<grid> g = std::nullopt) {
+static eval_res evaluate_function(const ast_node &ast, grid &g,
+                                  pos caller_cell_pos) {
     if (ast->type != ast_struct::type::FUNCTION)
         throw exception::cell_exception("ERROR: AST node is not a function yet "
                                         "evaluate_function was called");
@@ -72,7 +82,7 @@ static eval_res evaluate_function(const ast_node &ast,
 
         std::vector<double> nums;
         for (const auto &child : ast->children) {
-            auto res = evaluate(child, g);
+            auto res = evaluate(child, g, caller_cell_pos);
 
             if (!is_num(res))
                 throw exception::cell_exception(
@@ -96,7 +106,7 @@ static eval_res evaluate_function(const ast_node &ast,
 
         std::vector<double> nums;
         for (const auto &child : ast->children) {
-            auto res = evaluate(child, g);
+            auto res = evaluate(child, g, caller_cell_pos);
 
             if (!is_num(res))
                 throw exception::cell_exception(
@@ -118,7 +128,7 @@ static eval_res evaluate_function(const ast_node &ast,
             throw exception::cell_exception(
                 "SQRT function requires 1 argument");
 
-        auto child = evaluate(ast->children[0], g);
+        auto child = evaluate(ast->children[0], g, caller_cell_pos);
 
         if (!is_num(child))
             throw exception::cell_exception(
@@ -132,8 +142,8 @@ static eval_res evaluate_function(const ast_node &ast,
     throw exception::cell_exception(error_msg);
 }
 
-static eval_res evaluate_operator(const ast_node &ast,
-                                  std::optional<grid> g = std::nullopt) {
+static eval_res evaluate_operator(const ast_node &ast, grid &g,
+                                  pos caller_cell_pos) {
     if (ast->type != ast_struct::type::OPERATOR)
         throw exception::cell_exception(
             "ERROR: AST node is not an operator yet "
@@ -142,7 +152,7 @@ static eval_res evaluate_operator(const ast_node &ast,
     if (ast->value == "POS") {
         if (ast->children.size() != 1)
             throw exception::cell_exception("POS operator requires 1 argument");
-        auto res = evaluate(ast->children[0], g);
+        auto res = evaluate(ast->children[0], g, caller_cell_pos);
 
         if (!is_num(res))
             throw exception::cell_exception(
@@ -155,7 +165,7 @@ static eval_res evaluate_operator(const ast_node &ast,
         if (ast->children.size() != 1)
             throw exception::cell_exception("NEG operator requires 1 argument");
 
-        auto child = evaluate(ast->children[0], g);
+        auto child = evaluate(ast->children[0], g, caller_cell_pos);
         if (!is_num(child))
             throw exception::cell_exception(
                 "NEG operator requires a number argument");
@@ -171,8 +181,8 @@ static eval_res evaluate_operator(const ast_node &ast,
 
         std::cout << "Evaluating ADD operator" << std::endl;
         std::cout << "Left: " << ast->children[0]->value << std::endl;
-        auto left = evaluate(ast->children[0], g);
-        auto right = evaluate(ast->children[1], g);
+        auto left = evaluate(ast->children[0], g, caller_cell_pos);
+        auto right = evaluate(ast->children[1], g, caller_cell_pos);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -187,8 +197,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "SUB operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0], g);
-        auto right = evaluate(ast->children[1], g);
+        auto left = evaluate(ast->children[0], g, caller_cell_pos);
+        auto right = evaluate(ast->children[1], g, caller_cell_pos);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -203,8 +213,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "MUL operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0], g);
-        auto right = evaluate(ast->children[1], g);
+        auto left = evaluate(ast->children[0], g, caller_cell_pos);
+        auto right = evaluate(ast->children[1], g, caller_cell_pos);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -219,8 +229,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "DIV operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0], g);
-        auto right = evaluate(ast->children[1], g);
+        auto left = evaluate(ast->children[0], g, caller_cell_pos);
+        auto right = evaluate(ast->children[1], g, caller_cell_pos);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(
@@ -235,8 +245,8 @@ static eval_res evaluate_operator(const ast_node &ast,
             throw exception::cell_exception(
                 "POW operator requires 2 arguments");
 
-        auto left = evaluate(ast->children[0], g);
-        auto right = evaluate(ast->children[1], g);
+        auto left = evaluate(ast->children[0], g, caller_cell_pos);
+        auto right = evaluate(ast->children[1], g, caller_cell_pos);
 
         if (!is_num(left) || !is_num(right))
             throw exception::cell_exception(

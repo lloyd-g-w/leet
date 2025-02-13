@@ -10,17 +10,19 @@
 namespace std_cells {
 // Prototype
 
-static eval_res evaluate_function(const ast_node &ast, grid &g,
-                                  pos caller_cell_pos);
-static eval_res evaluate_operator(const ast_node &ast, grid &g,
-                                  pos caller_cell_pos);
+static eval_res evaluate_function(const eval_input &input);
+static eval_res evaluate_operator(const eval_input &input);
 static str to_str(const double &value);
 static bool is_whole_num(const double &number);
 static bool is_num(const eval_res &res);
 
 // End prototype
 
-eval_res evaluate(const ast_node &ast, grid &g, pos caller_cell_pos) {
+eval_res evaluate(const eval_input &input) {
+    ast_node &ast = input.ast;
+    grid &g = input.g;
+    pos caller_cell_pos = input.caller_cell_pos;
+
     switch (ast->type) {
         // LITERALS
         case ast_struct::type::INT:
@@ -56,11 +58,11 @@ eval_res evaluate(const ast_node &ast, grid &g, pos caller_cell_pos) {
         }
 
         case ast_struct::type::FUNCTION: {
-            return evaluate_function(ast, g, caller_cell_pos);
+            return evaluate_function(input);
         }
 
         case ast_struct::type::OPERATOR: {
-            return evaluate_operator(ast, g, caller_cell_pos);
+            return evaluate_operator(input);
         }
 
         default: break;
@@ -69,8 +71,11 @@ eval_res evaluate(const ast_node &ast, grid &g, pos caller_cell_pos) {
     throw exception::cell_exception("ERROR: Could not evaluate AST node");
 }
 
-static eval_res evaluate_function(const ast_node &ast, grid &g,
-                                  pos caller_cell_pos) {
+static eval_res evaluate_function(const eval_input &input) {
+    ast_node &ast = input.ast;
+    grid &g = input.g;
+    pos caller_cell_pos = input.caller_cell_pos;
+
     if (ast->type != ast_struct::type::FUNCTION)
         throw exception::cell_exception("ERROR: AST node is not a function yet "
                                         "evaluate_function was called");
@@ -81,8 +86,9 @@ static eval_res evaluate_function(const ast_node &ast, grid &g,
                 "SUM function requires at least 1 argument");
 
         std::vector<double> nums;
-        for (const auto &child : ast->children) {
-            auto res = evaluate(child, g, caller_cell_pos);
+        for (auto &child : ast->children) {
+            eval_input child_input = {child, g, caller_cell_pos};
+            auto res = evaluate(child_input);
 
             if (!is_num(res))
                 throw exception::cell_exception(
@@ -105,8 +111,9 @@ static eval_res evaluate_function(const ast_node &ast, grid &g,
                 "PRODUCT function requires at least 1 argument");
 
         std::vector<double> nums;
-        for (const auto &child : ast->children) {
-            auto res = evaluate(child, g, caller_cell_pos);
+        for (auto &child : ast->children) {
+            eval_input child_input = {child, g, caller_cell_pos};
+            auto res = evaluate(child_input);
 
             if (!is_num(res))
                 throw exception::cell_exception(

@@ -11,5 +11,22 @@ struct eval_res {
     str string;
 };
 
-eval_res evaluate(const ast_node &ast, grid &g, pos caller_cell_pos);
+struct eval_input {
+    ast_node &ast;
+    grid &g;
+    pos caller_cell_pos;
+};
+
+eval_res evaluate(const eval_input &input);
+
+class evaluator {
+  public:
+    evaluator(grid &g) : m_grid(g) {}
+
+    eval_res evaluate(const eval_input &input);
+
+  private:
+    grid &m_grid;
+};
+
 }  // namespace std_cells

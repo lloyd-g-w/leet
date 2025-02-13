@@ -36,6 +36,7 @@ struct ast_struct {
         STRING,
         CELL_REFERENCE
     } type;
+    std::variant<double, str> value;
     str value;
     std::vector<ast_node> children;
 

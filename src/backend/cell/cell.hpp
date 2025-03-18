@@ -6,7 +6,6 @@
 #include "../common.hpp"
 
 namespace std_cells {
-
 // Main class
 class cell {
   public:

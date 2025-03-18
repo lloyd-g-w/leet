@@ -10,12 +10,12 @@
 namespace std_cells {
 // Prototype
 
-static eval_res evaluate_function(const ast_node &ast, std::optional<grid> g);
+static eval_res
+evaluate_function(const ast_node &ast, std::optional<grid> g);
 static eval_res evaluate_operator(const ast_node &ast, std::optional<grid> g);
 static str to_str(const double &value);
 static bool is_whole_num(const double &number);
 static bool is_num(const eval_res &res);
-
 // End prototype
 
 eval_res evaluate(const ast_node &ast, std::optional<grid> g) {

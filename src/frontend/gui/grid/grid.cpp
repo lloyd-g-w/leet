@@ -12,8 +12,7 @@ grid::grid(std_cells::grid &cell_grid, window &window)
       m_row_labels(m_cell_grid.get_rows(),
                    {get_default_dims().width, get_default_dims().height}) {
     // Setup grid dimensions
-    dim_t default_dims = get_default_dims();
-    float default_spacing = get_default_spacing();
+    dim_t default_dims = get_default_dims(); float default_spacing = get_default_spacing();
     m_col_labels = label_group_t(m_cell_grid.get_cols(), default_dims);
     m_row_labels = label_group_t(m_cell_grid.get_rows(), default_dims);
     m_rows = m_cell_grid.get_rows();

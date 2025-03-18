@@ -66,4 +66,4 @@ class grid {
     cell &get_cell_mut(pos pos);
 };
 
-}  // namespace std_cells
+}  // namespace std_cell

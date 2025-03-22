@@ -1,4 +1,4 @@
-# holy-sheet
+# leet
 - Works on Linux and probably other systems ¯\\\_(ツ)\_/¯
 - If `git clone`ing, remember to add the `--recursive` flag
 ## Building the project

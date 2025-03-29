@@ -46,7 +46,7 @@ class palette {
   public:
     enum preset {
         BASIC_COLOURS,
-        HOLY_SHEET
+        LEET
     };
 
     palette(std::initializer_list<preset> presets = {});
@@ -61,6 +61,6 @@ class palette {
   private:
     colour_map colours;
     void add_basic_preset();
-    void add_holy_sheet();
+    void add_leet();
 };
 }  // namespace colours

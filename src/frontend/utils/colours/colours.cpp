@@ -73,7 +73,7 @@ colour palette::get(std::string name) {
 void palette::add_preset(preset preset) {
     switch (preset) {
         case BASIC_COLOURS: palette::add_basic_preset(); break;
-        case HOLY_SHEET: palette::add_holy_sheet(); break;
+        case LEET: palette::add_leet(); break;
     }
 }
 
@@ -111,7 +111,7 @@ void palette::add_basic_preset() {
     add("lavender", colour(230, 230, 250));
 }
 
-void palette::add_holy_sheet() {
+void palette::add_leet() {
     palette::add_basic_preset();
     add("active_blue", colour(0, 119, 182));
 }

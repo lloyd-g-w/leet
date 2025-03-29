@@ -4,7 +4,7 @@ app::app(std::string window_name, int window_width, int window_height,
          int grid_rows, int grid_cols) {
     int rows = 500;
     int cols = 500;
-    p_window = new window(1920, 1080, "Holy Sheet");
+    p_window = new window(1920, 1080, window_name.c_str());
     p_cell_grid = new std_cells::grid(rows, cols);
     p_grid_gui = new gui::grid(*p_cell_grid, *p_window);
 }

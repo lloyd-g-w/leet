@@ -5,4 +5,4 @@ if [ ! -d "build" ]; then
     bash build.sh
 fi
 
-./build/holy-sheet
+./build/leet

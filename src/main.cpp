@@ -1,9 +1,9 @@
 #include "frontend/application.hpp"
 
 int main() {
-    app holysheet = app("Holy Sheet", 1920, 1080, 50, 50);
+    app leet = app("Leet", 1920, 1080, 50, 50);
 
-    holysheet.run();
+    leet.run();
 
     return 0;
 }

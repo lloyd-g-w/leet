@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check if "build" directory exists
 if [ ! -d "build" ]; then

@@ -1,9 +1,9 @@
 #include "frontend/application.hpp"
 
 int main() {
-    app leet = app("Leet", 1920, 1080, 50, 50);
+    app appl = app("Lead", 1920, 1080, 50, 50);
 
-    leet.run();
+    appl.run();
 
     return 0;
 }

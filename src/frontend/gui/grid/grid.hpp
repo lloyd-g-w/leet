@@ -4,7 +4,7 @@
 
 #include "../../window_renderer/window.hpp"
 #include "../common.hpp"
-#include "leet/src/backend/grid/grid.hpp"
+#include "lead/src/backend/grid/grid.hpp"
 #include "imgui.h"
 
 namespace gui {

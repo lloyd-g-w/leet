@@ -1,7 +1,7 @@
 # Example usage: mkdir build cd build cmake -g "Visual Studio 14 2015" ..
 
 cmake_minimum_required(VERSION 3.15)
-project(leet C CXX)
+project(lead C CXX)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE
@@ -43,7 +43,7 @@ file(GLOB_RECURSE sources "${SRC_DIR}/*.cpp")
 list(FILTER sources EXCLUDE REGEX ".*/tests/.*")
 
 add_executable(
-  leet
+  lead
   ${sources}
   ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
   ${IMGUI_DIR}/backends/imgui_impl_vulkan.cpp
@@ -52,4 +52,4 @@ add_executable(
   ${IMGUI_DIR}/imgui_demo.cpp
   ${IMGUI_DIR}/imgui_tables.cpp
   ${IMGUI_DIR}/imgui_widgets.cpp)
-target_link_libraries(leet ${LIBRARIES})
+target_link_libraries(lead ${LIBRARIES})

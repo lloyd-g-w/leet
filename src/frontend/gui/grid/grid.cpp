@@ -37,7 +37,7 @@ grid::grid(std_cells::grid &cell_grid, window &window)
     io.FontGlobalScale = 1.0 / 10;
 
     // Add some default colours
-    this->m_colours.add_preset(colours::palette::LEET);
+    this->m_colours.add_preset(colours::palette::LEAD);
 }
 
 void grid::draw() {
